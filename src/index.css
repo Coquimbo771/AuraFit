@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .glass {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl;
+  }
+
+  .glass-dark {
+    @apply bg-black/10 backdrop-blur-xl border border-white/10 rounded-2xl;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 rounded-full bg-sage text-white font-semibold transition-all duration-300 hover:bg-sage-700 active:scale-95;
+  }
+
+  .btn-neon {
+    @apply px-6 py-3 rounded-full bg-neon-blue text-black font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/50 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 rounded-full border-2 border-sage text-sage font-semibold transition-all duration-300 hover:bg-sage/10 active:scale-95;
+  }
+
+  .glow-neon {
+    @apply shadow-lg shadow-neon-blue/30;
+  }
+}
