@@ -22,33 +22,37 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
       });
 
       if (authError) throw authError;
 
       if (authData.user) {
-        const { error: profileError } = await supabase.from('users').insert([
-          {
-            id: authData.user.id,
-            email,
-            full_name: fullName,
-          },
-        ]);
+        // We wait a brief moment for the database trigger to complete
+        const { data: userData, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', authData.user.id)
+          .single();
 
-        if (profileError) throw profileError;
-
-        set({
-          user: {
-            id: authData.user.id,
-            email,
-            full_name: fullName,
-            avatar_url: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          session: authData.session,
-          loading: false,
-        });
+        // If the profile isn't ready yet (race condition), we'll retry once after 1 second
+        if (profileError) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const { data: retryData, error: retryError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', authData.user.id)
+            .single();
+          
+          if (retryError) throw retryError;
+          set({ user: retryData, session: authData.session, loading: false });
+        } else {
+          set({ user: userData, session: authData.session, loading: false });
+        }
       }
     } catch (error) {
       set({
