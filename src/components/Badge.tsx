@@ -8,11 +8,11 @@ interface BadgeProps {
 
 export const Badge: React.FC<BadgeProps> = ({ label, variant = 'primary', icon }) => {
   const variantClasses = {
-    primary: 'bg-sage/20 text-sage border border-sage/30',
-    success: 'bg-green-100 text-green-700 border border-green-300',
-    warning: 'bg-yellow-100 text-yellow-700 border border-yellow-300',
-    danger: 'bg-red-100 text-red-700 border border-red-300',
-    info: 'bg-neon-blue/20 text-neon-blue border border-neon-blue/30',
+    primary: 'bg-ink/10 text-ink border border-ink/20',
+    success: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+    warning: 'bg-amber-100 text-amber-800 border border-amber-200',
+    danger: 'bg-rose-100 text-rose-800 border border-rose-200',
+    info: 'bg-sun/30 text-ink border border-sun/50',
   };
 
   return (

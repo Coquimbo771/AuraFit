@@ -4,6 +4,16 @@ export default {
   theme: {
     extend: {
       colors: {
+        'ink': '#1F1A17',
+        'ink-50': '#F7F4F1',
+        'ink-100': '#EFE7E1',
+        'ink-200': '#D9C9BE',
+        'ink-300': '#C2AA9A',
+        'ink-400': '#A07E6F',
+        'ink-500': '#7B5B4B',
+        'ink-600': '#62463A',
+        'ink-700': '#4A352C',
+        'ink-800': '#32241F',
         'sage': '#7C9A92',
         'sage-50': '#F2F5F4',
         'sage-100': '#E8F0EE',
@@ -21,12 +31,18 @@ export default {
         'sand-300': '#F3EDDB',
         'sand-400': '#EFE7CF',
         'sand-500': '#F5F5DC',
+        'ember': '#FF6B35',
+        'ember-600': '#E0562E',
+        'ember-700': '#C54826',
+        'sun': '#FFC857',
+        'sun-600': '#F4B942',
         'neon-blue': '#00F0FF',
         'neon-blue-dark': '#00D9F0',
         'neon-blue-light': '#4FE9FF',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Fraunces"', 'ui-serif', 'Georgia', 'serif'],
       },
       backdropBlur: {
         xs: '2px',

@@ -14,16 +14,16 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-sage mb-2">
+          <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-ink/60 mb-2">
             {label}
           </label>
         )}
         <div className="relative">
-          {icon && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-sage/50">{icon}</div>}
+          {icon && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/50">{icon}</div>}
           <input
             ref={ref}
-            className={`w-full px-4 py-3 ${icon ? 'pl-12' : ''} rounded-xl border-2 border-sage/20 focus:border-sage focus:outline-none transition-colors duration-200 bg-white/50 backdrop-blur-sm ${className} ${
-              error ? 'border-red-500' : ''
+            className={`w-full px-4 py-3 ${icon ? 'pl-12' : ''} rounded-2xl border-2 border-ink/10 focus:border-ember focus:outline-none transition-colors duration-200 bg-white/80 backdrop-blur-sm ${className} ${
+              error ? 'border-rose-500' : ''
             }`}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
@@ -31,7 +31,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
           {isFocused && (
             <motion.div
-              className="absolute inset-0 rounded-xl border-2 border-sage pointer-events-none"
+              className="absolute inset-0 rounded-2xl border-2 border-ember pointer-events-none"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Card } from './Card';
@@ -11,6 +11,9 @@ interface BlogArticleCardProps {
 }
 
 export const BlogArticleCard: React.FC<BlogArticleCardProps> = ({ article, onClick }) => {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  
   const readingTime = Math.ceil(article.content.split(/\s+/).length / 200);
 
   const categoryLabels: Record<string, string> = {
@@ -18,6 +21,20 @@ export const BlogArticleCard: React.FC<BlogArticleCardProps> = ({ article, onCli
     'body-types': 'Body Types',
     'sustainability': 'Sustainability',
     'science': 'Science',
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoading(false);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoading(false);
+  };
+
+  // Fallback image for blog articles
+  const getFallbackImage = () => {
+    return 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=400&fit=crop&q=80';
   };
 
   return (
@@ -28,13 +45,20 @@ export const BlogArticleCard: React.FC<BlogArticleCardProps> = ({ article, onCli
       className="cursor-pointer h-full"
     >
       <Card variant="solid" hover={false} className="overflow-hidden h-full flex flex-col">
-        <div className="relative overflow-hidden bg-gradient-to-br from-sage/20 to-neon-blue/10 h-48">
+        <div className="relative overflow-hidden bg-gradient-to-br from-sun/30 to-ember/10 h-48">
+          {imageLoading && !imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-sand/30 animate-pulse">
+              <div className="w-10 h-10 border-4 border-ember/30 border-t-ember rounded-full animate-spin" />
+            </div>
+          )}
           <img
-            src={article.featured_image_url || 'https://via.placeholder.com/400x300?text=Blog'}
+            src={imageError ? getFallbackImage() : (article.featured_image_url || getFallbackImage())}
             alt={article.title}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+            className={`w-full h-full object-cover transition-all duration-300 hover:scale-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/40 to-transparent" />
           <div className="absolute top-4 left-4">
             <Badge label={categoryLabels[article.category] || article.category} variant="info" />
           </div>
@@ -42,16 +66,16 @@ export const BlogArticleCard: React.FC<BlogArticleCardProps> = ({ article, onCli
 
         <div className="p-5 flex-1 flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-lg text-sage mb-2 line-clamp-2">{article.title}</h3>
-            <p className="text-sm text-gray-600 mb-4 line-clamp-3">{article.excerpt || article.content.substring(0, 100)}...</p>
+            <h3 className="font-bold text-lg text-ink mb-2 line-clamp-2">{article.title}</h3>
+            <p className="text-sm text-ink/70 mb-4 line-clamp-3">{article.excerpt || article.content.substring(0, 100)}...</p>
           </div>
 
-          <div className="border-t border-sage/10 pt-4 flex items-center justify-between">
-            <div className="text-xs text-gray-500">
-              <p className="font-medium text-sage mb-1">{article.author}</p>
+          <div className="border-t border-ink/10 pt-4 flex items-center justify-between">
+            <div className="text-xs text-ink/50">
+              <p className="font-medium text-ink mb-1">{article.author}</p>
               <p>{readingTime} min read</p>
             </div>
-            <motion.div whileHover={{ x: 4 }} className="text-sage">
+            <motion.div whileHover={{ x: 4 }} className="text-ink">
               <ArrowRight size={20} />
             </motion.div>
           </div>

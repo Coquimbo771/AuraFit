@@ -32,7 +32,7 @@ export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut, loading: authLoading } = useAuthStore();
   const { currentScan, scanHistory, fetchScanHistory, loading: biometricLoading } = useBiometricStore();
-  const { savedItems } = useShoppingStore();
+  const { savedItems, orders, fetchOrders } = useShoppingStore();
   const [savedProducts, setSavedProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
 
@@ -42,7 +42,8 @@ export const Dashboard: React.FC = () => {
       return;
     }
     fetchScanHistory(user.id);
-  }, [user, fetchScanHistory, navigate]);
+    fetchOrders(user.id);
+  }, [user, fetchScanHistory, fetchOrders, navigate]);
 
   useEffect(() => {
     const fetchSavedProducts = async () => {
@@ -102,16 +103,17 @@ export const Dashboard: React.FC = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gradient-to-b from-sage-50 to-sand py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-sand-50 via-sand to-white pt-24 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between mb-12"
+            className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12"
           >
             <div>
-              <h1 className="text-4xl font-bold text-sage">Smart Wardrobe</h1>
-              <p className="text-gray-600">Welcome, {user?.full_name || 'User'}</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-ink/50">Dashboard</p>
+              <h1 className="text-4xl font-bold text-ink">Tu guardarropa inteligente</h1>
+              <p className="text-ink/70">Hola, {user?.full_name || 'User'}</p>
             </div>
             <Button
               variant="secondary"
@@ -120,7 +122,7 @@ export const Dashboard: React.FC = () => {
               className="flex items-center gap-2"
             >
               <LogOut size={20} />
-              Sign Out
+              Cerrar sesion
             </Button>
           </motion.div>
 
@@ -137,16 +139,16 @@ export const Dashboard: React.FC = () => {
               ) : (
                 <Card variant="solid" className="p-8 h-full flex flex-col justify-between">
                   <div>
-                    <h2 className="text-2xl font-bold text-sage mb-2">Your Profile</h2>
-                    <p className="text-gray-600 mb-6">{user?.email}</p>
+                    <h2 className="text-2xl font-bold text-ink mb-2">Tu perfil</h2>
+                    <p className="text-ink/60 mb-6">{user?.email}</p>
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-600">
-                      Member since {new Date(user?.created_at || '').toLocaleDateString()}
+                    <p className="text-sm text-ink/60">
+                      Miembro desde {new Date(user?.created_at || '').toLocaleDateString()}
                     </p>
                     <Button variant="ghost" size="sm">
                       <Edit size={16} />
-                      Edit
+                      Editar
                     </Button>
                   </div>
                 </Card>
@@ -160,17 +162,17 @@ export const Dashboard: React.FC = () => {
               ) : currentScan ? (
                 <Card variant="solid" className="p-8 h-full">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-sage">Latest Scan</h2>
-                    <Camera className="text-neon-blue" size={20} />
+                    <h2 className="text-lg font-bold text-ink">Ultimo escaneo</h2>
+                    <Camera className="text-ember" size={20} />
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-xs text-gray-600">Body Shape</p>
-                      <p className="font-semibold text-sage">{bodyShapeLabels[currentScan.body_shape] || currentScan.body_shape}</p>
+                      <p className="text-xs text-ink/50">Tipo de cuerpo</p>
+                      <p className="font-semibold text-ink">{bodyShapeLabels[currentScan.body_shape] || currentScan.body_shape}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600">Skin Tone</p>
-                      <p className="font-semibold text-sage">{skinToneLabels[currentScan.skin_tone] || currentScan.skin_tone}</p>
+                      <p className="text-xs text-ink/50">Tono de piel</p>
+                      <p className="font-semibold text-ink">{skinToneLabels[currentScan.skin_tone] || currentScan.skin_tone}</p>
                     </div>
                     <Button
                       variant="secondary"
@@ -178,20 +180,20 @@ export const Dashboard: React.FC = () => {
                       className="w-full mt-4"
                       onClick={() => navigate('/scan')}
                     >
-                      New Scan
+                      Nuevo escaneo
                     </Button>
                   </div>
                 </Card>
               ) : (
                 <Card variant="glass" className="p-8 h-full flex flex-col justify-center items-center text-center">
-                  <Camera className="text-sage/40 mb-4" size={32} />
-                  <p className="text-gray-600 mb-4">No scans yet</p>
+                  <Camera className="text-ink/40 mb-4" size={32} />
+                  <p className="text-ink/60 mb-4">Aun no tienes escaneos</p>
                   <Button
-                    variant="neon"
+                    variant="primary"
                     size="sm"
                     onClick={() => navigate('/scan')}
                   >
-                    Start Scanning
+                    Iniciar escaneo
                   </Button>
                 </Card>
               )}
@@ -203,13 +205,13 @@ export const Dashboard: React.FC = () => {
                 <Skeleton type="card" className="h-48" />
               ) : currentScan?.color_palette ? (
                 <Card variant="solid" className="p-6 h-full">
-                  <h3 className="font-bold text-sage mb-4">Color Palette</h3>
+                  <h3 className="font-bold text-ink mb-4">Paleta de color</h3>
                   <div className="grid grid-cols-2 gap-2">
                     {currentScan.color_palette.slice(0, 4).map((color, i) => (
                       <motion.div
                         key={i}
                         whileHover={{ scale: 1.05 }}
-                        className="aspect-square rounded-lg border-2 border-sage/10 cursor-pointer"
+                        className="aspect-square rounded-lg border-2 border-ink/10 cursor-pointer"
                         style={{ backgroundColor: color }}
                         title={color}
                       />
@@ -218,7 +220,7 @@ export const Dashboard: React.FC = () => {
                 </Card>
               ) : (
                 <Card variant="minimal" className="p-6 h-full flex items-center justify-center">
-                  <p className="text-sm text-gray-500 text-center">No color data</p>
+                  <p className="text-sm text-ink/50 text-center">Sin datos de color</p>
                 </Card>
               )}
             </motion.div>
@@ -229,7 +231,7 @@ export const Dashboard: React.FC = () => {
                 <Skeleton type="card" className="h-96" />
               ) : (
                 <Card variant="solid" className="p-8 h-full flex flex-col">
-                  <h3 className="text-lg font-bold text-sage mb-6">Scan History</h3>
+                  <h3 className="text-lg font-bold text-ink mb-6">Historial de escaneos</h3>
                   <div className="space-y-3 flex-1 overflow-y-auto">
                     {scanHistory.slice(0, 5).map((scan, i) => (
                       <motion.div
@@ -237,21 +239,21 @@ export const Dashboard: React.FC = () => {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className="p-3 bg-sage/5 rounded-lg flex items-center justify-between"
+                        className="p-3 bg-ink/5 rounded-2xl flex items-center justify-between"
                       >
                         <div>
-                          <p className="text-sm font-medium text-sage capitalize">
+                          <p className="text-sm font-medium text-ink capitalize">
                             {bodyShapeLabels[scan.body_shape] || scan.body_shape}
                           </p>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-xs text-ink/60">
                             {new Date(scan.scan_date).toLocaleDateString()}
                           </p>
                         </div>
-                        <Camera size={16} className="text-gray-400" />
+                        <Camera size={16} className="text-ink/40" />
                       </motion.div>
                     ))}
                     {scanHistory.length === 0 && (
-                      <p className="text-center text-gray-600 text-sm">No scan history yet</p>
+                      <p className="text-center text-ink/60 text-sm">Sin historial de escaneos</p>
                     )}
                   </div>
                 </Card>
@@ -265,22 +267,22 @@ export const Dashboard: React.FC = () => {
               ) : (
                 <Card variant="solid" className="p-6 h-full">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-sage">Saved Items</h3>
-                    <Heart className="text-red-500" size={20} fill="currentColor" />
+                    <h3 className="font-bold text-ink">Guardados</h3>
+                    <Heart className="text-rose-500" size={20} fill="currentColor" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {savedProducts.slice(0, 4).map((product, i) => (
                       <motion.div
                         key={i}
                         whileHover={{ scale: 1.05 }}
-                        className="aspect-square rounded-lg bg-sage/10 flex items-center justify-center text-center p-2 cursor-pointer"
+                        className="aspect-square rounded-2xl bg-ink/5 flex items-center justify-center text-center p-2 cursor-pointer"
                       >
-                        <p className="text-xs font-medium text-sage line-clamp-2">{product.name}</p>
+                        <p className="text-xs font-medium text-ink line-clamp-2">{product.name}</p>
                       </motion.div>
                     ))}
                   </div>
                   {savedItems.length > 4 && (
-                    <p className="text-xs text-gray-600 mt-3">+{savedItems.length - 4} more items</p>
+                    <p className="text-xs text-ink/60 mt-3">+{savedItems.length - 4} items mas</p>
                   )}
                   <Button
                     variant="secondary"
@@ -288,7 +290,7 @@ export const Dashboard: React.FC = () => {
                     className="w-full mt-4"
                     onClick={() => navigate('/marketplace')}
                   >
-                    View All
+                    Ver todos
                   </Button>
                 </Card>
               )}
@@ -300,9 +302,9 @@ export const Dashboard: React.FC = () => {
                 <Skeleton type="card" className="h-48" />
               ) : (
                 <Card variant="solid" className="p-6 h-full flex flex-col justify-center items-center text-center">
-                  <TrendingUp className="text-neon-blue mb-2" size={28} />
-                  <p className="text-sm text-gray-600 mb-1">Match Avg</p>
-                  <p className="text-3xl font-bold text-sage">{savedItems.length > 0 ? '87%' : '—'}</p>
+                  <TrendingUp className="text-ember mb-2" size={28} />
+                  <p className="text-sm text-ink/60 mb-1">Pedidos</p>
+                  <p className="text-3xl font-bold text-ink">{orders.length}</p>
                 </Card>
               )}
             </motion.div>
@@ -314,8 +316,8 @@ export const Dashboard: React.FC = () => {
               ) : (
                 <Card variant="solid" className="p-6 h-full flex flex-col justify-center items-center text-center">
                   <Leaf className="text-sage mb-2" size={28} />
-                  <p className="text-sm text-gray-600 mb-1">Avg Rating</p>
-                  <p className="text-3xl font-bold text-sage">{avgRating}★</p>
+                  <p className="text-sm text-ink/60 mb-1">Impacto verde</p>
+                  <p className="text-3xl font-bold text-ink">{avgRating}★</p>
                 </Card>
               )}
             </motion.div>

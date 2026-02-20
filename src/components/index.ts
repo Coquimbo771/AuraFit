@@ -8,3 +8,5 @@ export { PageTransition } from './PageTransition';
 export { Modal } from './Modal';
 export { ProductCard } from './ProductCard';
 export { BlogArticleCard } from './BlogArticleCard';
+export { PredictiveInput } from './PredictiveInput';
+export { PersonalizedRecommendations } from './PersonalizedRecommendations';

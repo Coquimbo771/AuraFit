@@ -1,31 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-sand-50 text-ink;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+}
+
 @layer components {
   .glass {
-    @apply bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl;
+    @apply bg-white/70 backdrop-blur-xl border border-ink/10 rounded-3xl shadow-[0_20px_60px_-40px_rgba(31,26,23,0.45)];
   }
 
   .glass-dark {
-    @apply bg-black/10 backdrop-blur-xl border border-white/10 rounded-2xl;
+    @apply bg-ink/50 backdrop-blur-xl border border-white/10 rounded-3xl;
   }
 
   .btn-primary {
-    @apply px-6 py-3 rounded-full bg-sage text-white font-semibold transition-all duration-300 hover:bg-sage-700 active:scale-95;
+    @apply px-6 py-3 rounded-full bg-ember text-ink font-semibold transition-all duration-300 hover:bg-ember-600 active:scale-95 shadow-[0_12px_30px_-12px_rgba(255,107,53,0.6)];
   }
 
   .btn-neon {
-    @apply px-6 py-3 rounded-full bg-neon-blue text-black font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/50 active:scale-95;
+    @apply px-6 py-3 rounded-full bg-sun text-ink font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-sun/50 active:scale-95;
   }
 
   .btn-secondary {
-    @apply px-6 py-3 rounded-full border-2 border-sage text-sage font-semibold transition-all duration-300 hover:bg-sage/10 active:scale-95;
+    @apply px-6 py-3 rounded-full border-2 border-ink/30 text-ink font-semibold transition-all duration-300 hover:bg-ink/5 active:scale-95;
   }
 
   .glow-neon {
     @apply shadow-lg shadow-neon-blue/30;
+  }
+
+  .grain {
+    background-image: radial-gradient(rgba(31, 26, 23, 0.06) 1px, transparent 0);
+    background-size: 6px 6px;
   }
 }

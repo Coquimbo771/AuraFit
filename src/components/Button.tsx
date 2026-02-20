@@ -10,13 +10,13 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', isLoading = false, className = '', children, ...props }, ref) => {
-    const baseClasses = 'font-semibold rounded-full transition-all duration-300 flex items-center justify-center gap-2';
+    const baseClasses = 'font-semibold rounded-full transition-all duration-300 flex items-center justify-center gap-2 border border-transparent';
 
     const variantClasses = {
-      primary: 'bg-sage text-white hover:bg-sage-700 active:scale-95',
-      neon: 'bg-neon-blue text-black hover:shadow-lg hover:shadow-neon-blue/50 active:scale-95',
-      secondary: 'border-2 border-sage text-sage hover:bg-sage/10 active:scale-95',
-      ghost: 'text-sage hover:bg-sage/5 active:scale-95',
+      primary: 'bg-ember text-ink hover:bg-ember-600 active:scale-95 shadow-[0_14px_30px_-16px_rgba(255,107,53,0.7)]',
+      neon: 'bg-sun text-ink hover:bg-sun-600 active:scale-95 shadow-[0_14px_30px_-16px_rgba(255,200,87,0.7)]',
+      secondary: 'border-2 border-ink/30 text-ink hover:bg-ink/5 active:scale-95',
+      ghost: 'text-ink hover:bg-ink/5 active:scale-95',
     };
 
     const sizeClasses = {

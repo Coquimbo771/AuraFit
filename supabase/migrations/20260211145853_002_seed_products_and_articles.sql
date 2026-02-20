@@ -6,40 +6,41 @@
   3. Mix of price points ($49-$499) and occasions (office, gym, party, casual)
 */
 
--- Insert Products with Unsplash URLs for high-quality fashion images
+-- Insert Products with high-quality Unsplash fashion images
+-- Updated URLs with verified stable images and q=80 for quality
 INSERT INTO products (name, description, price, category, occasion, image_url, sustainable_rating, color_palette) VALUES
-('Minimalist Linen Blazer', 'Effortless luxury in pure linen. Perfect for office elegance.', 189.99, 'office', 'office', 'https://images.unsplash.com/photo-1591047990975-2c71cf92f34f?w=500&h=600&fit=crop', 5, '["#8B8B7E", "#D4D4C8", "#E8E8E0"]'),
-('Silk Charmeuse Blouse', 'Sustainable silk with a fluid silhouette for any occasion.', 129.99, 'office', 'office', 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500&h=600&fit=crop', 4, '["#FFFFFF", "#000000", "#87CEEB"]'),
-('Premium Denim Jacket', 'Eco-friendly denim with timeless style. A wardrobe essential.', 149.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1602032294842-a50e88e2b0d2?w=500&h=600&fit=crop', 4, '["#1E3A5F", "#B8B8B8", "#FFFFFF"]'),
-('High-Waist Tailored Pants', 'Structured elegance. Perfect fit for professional settings.', 159.99, 'office', 'office', 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500&h=600&fit=crop', 5, '["#2C2C2C", "#8B7355", "#D3D3D3"]'),
-('Athletic Performance Leggings', 'Moisture-wicking, high-waisted compression for gym sessions.', 99.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1506215227693-75521eca3e01?w=500&h=600&fit=crop', 4, '["#1A1A1A", "#FF6B6B", "#4ECDC4"]'),
-('Luxury Cashmere Sweater', 'Soft, warm, and timeless. A true luxury essential.', 299.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1590080876-486b8de8c583?w=500&h=600&fit=crop', 5, '["#8B7355", "#D4A574", "#FFFFFF"]'),
-('Silk Evening Gown', 'Dramatic and elegant. Perfect for any formal occasion.', 449.99, 'party', 'party', 'https://images.unsplash.com/photo-1595948133356-0deb1dc69b44?w=500&h=600&fit=crop', 4, '["#8B0000", "#FF1493", "#FFB6C1"]'),
-('Organic Cotton T-Shirt', 'Sustainable comfort in everyday style.', 49.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=600&fit=crop', 5, '["#FFFFFF", "#000000", "#FFD700"]'),
-('Designer Handbag', 'Sophisticated structured leather. Investment piece.', 399.99, 'office', 'office', 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=600&fit=crop', 4, '["#8B4513", "#D2B48C", "#FFFFFF"]'),
-('Yoga Studio Jacket', 'Lightweight, breathable. From studio to street.', 89.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1556672172-6ff0ee1b9a64?w=500&h=600&fit=crop', 5, '["#6B5B95", "#D291BC", "#F0E68C"]'),
-('Tailored Pencil Skirt', 'Timeless silhouette. Works with everything in your wardrobe.', 119.99, 'office', 'office', 'https://images.unsplash.com/photo-1598395696048-a2b9e0900a71?w=500&h=600&fit=crop', 3, '["#000000", "#2F4F4F", "#696969"]'),
-('Sustainable Leather Boots', 'Eco-conscious craftsmanship. Versatile and durable.', 249.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1616733551166-1c3c1d3f0ddd?w=500&h=600&fit=crop', 5, '["#8B4513", "#654321", "#A0826D"]'),
-('Linen Summer Dress', 'Breezy and elegant. Perfect for warm weather style.', 139.99, 'party', 'party', 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=500&h=600&fit=crop', 5, '["#F0E68C", "#FFD700", "#FFA500"]'),
-('Compression Sports Bra', 'High support, elegant design. Performance meets style.', 79.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1506215227693-75521eca3e01?w=500&h=600&fit=crop', 4, '["#000000", "#FF69B4", "#FFFFFF"]'),
-('Oversized Wool Coat', 'Statement piece. Warmth with luxury.', 359.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1539533057686-c14ab9e7d235?w=500&h=600&fit=crop', 4, '["#8B7355", "#D3D3D3", "#000000"]'),
-('Midi Pencil Dress', 'Sophisticated office staple. Pairs perfectly with accessories.', 159.99, 'office', 'office', 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500&h=600&fit=crop', 4, '["#4B0082", "#9370DB", "#DDA0DD"]'),
-('Running Shorts', 'Breathable mesh, supportive fit. Built for performance.', 69.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1506215227693-75521eca3e01?w=500&h=600&fit=crop', 3, '["#FF6347", "#000000", "#FFFFFF"]'),
-('Sequin Party Top', 'Sparkle and shine. The ultimate party staple.', 129.99, 'party', 'party', 'https://images.unsplash.com/photo-1595777677583-95e058d6b451?w=500&h=600&fit=crop', 2, '["#FFD700", "#FFA500", "#FF69B4"]'),
-('Bamboo Eco Joggers', 'Sustainable comfort. Perfect for casual days.', 89.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1506215227693-75521eca3e01?w=500&h=600&fit=crop', 5, '["#8B7355", "#D4A574", "#FFFFFF"]'),
-('Statement Gold Earrings', 'Luxury accessory. Elevates any outfit instantly.', 199.99, 'party', 'party', 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=600&fit=crop', 4, '["#FFD700", "#FFA500", "#8B4513"]'),
-('Structured Blazer Dress', 'Modern take on the classic. Office to evening ready.', 189.99, 'office', 'office', 'https://images.unsplash.com/photo-1592078615290-033ee584e267?w=500&h=600&fit=crop', 4, '["#000000", "#8B0000", "#D3D3D3"]'),
-('Mesh Sports Tank', 'Breathable design with sleek silhouette for workouts.', 59.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1506215227693-75521eca3e01?w=500&h=600&fit=crop', 3, '["#000000", "#FF69B4", "#87CEEB"]'),
-('Maxi Evening Skirt', 'Romantic and sophisticated. Perfect floor-length elegance.', 219.99, 'party', 'party', 'https://images.unsplash.com/photo-1551311080-5cbd8d3eba6e?w=500&h=600&fit=crop', 3, '["#4B0082", "#8B008B", "#DAA520"]'),
-('Linen Blend Pants', 'Breathable, wrinkle-resistant. Summer professional style.', 129.99, 'office', 'office', 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500&h=600&fit=crop', 4, '["#F5DEB3", "#D2B48C", "#FFFFFF"]'),
-('Athleisure Hoodie', 'Luxury comfort. Perfect for gym to coffee transition.', 119.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1556672172-6ff0ee1b9a64?w=500&h=600&fit=crop', 4, '["#2F4F4F", "#708090", "#C0C0C0"]'),
-('Luxury Perfume Set', 'Signature scents. Elevate your style profile.', 149.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500&h=600&fit=crop', 5, '["#8B4513", "#FFD700", "#E6E6FA"]'),
-('White Button-Up Shirt', 'Timeless essential. Endless styling possibilities.', 99.99, 'office', 'office', 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500&h=600&fit=crop', 4, '["#FFFFFF", "#000000", "#C0C0C0"]'),
-('Backless Party Dress', 'Bold and beautiful. The ultimate statement piece.', 279.99, 'party', 'party', 'https://images.unsplash.com/photo-1595777677583-95e058d6b451?w=500&h=600&fit=crop', 3, '["#8B0000", "#FF1493", "#FFB6C1"]'),
-('Sustainable Sneakers', 'Eco-friendly comfort. Perfect for everyday wear.', 129.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=600&fit=crop', 5, '["#FFFFFF", "#000000", "#696969"]'),
-('Workout Crop Top', 'High support, sleek design. Engineered for performance.', 69.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1506215227693-75521eca3e01?w=500&h=600&fit=crop', 4, '["#000000", "#FF6B6B", "#FFB6C1"]');
+('Minimalist Linen Blazer', 'Effortless luxury in pure linen. Perfect for office elegance.', 189.99, 'office', 'office', 'https://images.unsplash.com/photo-1591047990975-2c71cf92f34f?w=500&h=600&fit=crop&q=80', 5, '["#8B8B7E", "#D4D4C8", "#E8E8E0"]'),
+('Silk Charmeuse Blouse', 'Sustainable silk with a fluid silhouette for any occasion.', 129.99, 'office', 'office', 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500&h=600&fit=crop&q=80', 4, '["#FFFFFF", "#000000", "#87CEEB"]'),
+('Premium Denim Jacket', 'Eco-friendly denim with timeless style. A wardrobe essential.', 149.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&h=600&fit=crop&q=80', 4, '["#1E3A5F", "#B8B8B8", "#FFFFFF"]'),
+('High-Waist Tailored Pants', 'Structured elegance. Perfect fit for professional settings.', 159.99, 'office', 'office', 'https://images.unsplash.com/photo-1517438476312-10d79c077509?w=500&h=600&fit=crop&q=80', 5, '["#2C2C2C", "#8B7355", "#D3D3D3"]'),
+('Athletic Performance Leggings', 'Moisture-wicking, high-waisted compression for gym sessions.', 99.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=500&h=600&fit=crop&q=80', 4, '["#1A1A1A", "#FF6B6B", "#4ECDC4"]'),
+('Luxury Cashmere Sweater', 'Soft, warm, and timeless. A true luxury essential.', 299.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=600&fit=crop&q=80', 5, '["#8B7355", "#D4A574", "#FFFFFF"]'),
+('Silk Evening Gown', 'Dramatic and elegant. Perfect for any formal occasion.', 449.99, 'party', 'party', 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=500&h=600&fit=crop&q=80', 4, '["#8B0000", "#FF1493", "#FFB6C1"]'),
+('Organic Cotton T-Shirt', 'Sustainable comfort in everyday style.', 49.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=600&fit=crop&q=80', 5, '["#FFFFFF", "#000000", "#FFD700"]'),
+('Designer Handbag', 'Sophisticated structured leather. Investment piece.', 399.99, 'office', 'office', 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=600&fit=crop&q=80', 4, '["#8B4513", "#D2B48C", "#FFFFFF"]'),
+('Yoga Studio Jacket', 'Lightweight, breathable. From studio to street.', 89.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&h=600&fit=crop&q=80', 5, '["#6B5B95", "#D291BC", "#F0E68C"]'),
+('Tailored Pencil Skirt', 'Timeless silhouette. Works with everything in your wardrobe.', 119.99, 'office', 'office', 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500&h=600&fit=crop&q=80', 3, '["#000000", "#2F4F4F", "#696969"]'),
+('Sustainable Leather Boots', 'Eco-conscious craftsmanship. Versatile and durable.', 249.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=500&h=600&fit=crop&q=80', 5, '["#8B4513", "#654321", "#A0826D"]'),
+('Linen Summer Dress', 'Breezy and elegant. Perfect for warm weather style.', 139.99, 'party', 'party', 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500&h=600&fit=crop&q=80', 5, '["#F0E68C", "#FFD700", "#FFA500"]'),
+('Compression Sports Bra', 'High support, elegant design. Performance meets style.', 79.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1614689891149-e338547bc0b6?w=500&h=600&fit=crop&q=80', 4, '["#000000", "#FF69B4", "#FFFFFF"]'),
+('Oversized Wool Coat', 'Statement piece. Warmth with luxury.', 359.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=500&h=600&fit=crop&q=80', 4, '["#8B7355", "#D3D3D3", "#000000"]'),
+('Midi Pencil Dress', 'Sophisticated office staple. Pairs perfectly with accessories.', 159.99, 'office', 'office', 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=500&h=600&fit=crop&q=80', 4, '["#4B0082", "#9370DB", "#DDA0DD"]'),
+('Running Shorts', 'Breathable mesh, supportive fit. Built for performance.', 69.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=500&h=600&fit=crop&q=80', 3, '["#FF6347", "#000000", "#FFFFFF"]'),
+('Sequin Party Top', 'Sparkle and shine. The ultimate party staple.', 129.99, 'party', 'party', 'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=500&h=600&fit=crop&q=80', 2, '["#FFD700", "#FFA500", "#FF69B4"]'),
+('Bamboo Eco Joggers', 'Sustainable comfort. Perfect for casual days.', 89.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1555689502-c4b22d76c56f?w=500&h=600&fit=crop&q=80', 5, '["#8B7355", "#D4A574", "#FFFFFF"]'),
+('Statement Gold Earrings', 'Luxury accessory. Elevates any outfit instantly.', 199.99, 'party', 'party', 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&h=600&fit=crop&q=80', 4, '["#FFD700", "#FFA500", "#8B4513"]'),
+('Structured Blazer Dress', 'Modern take on the classic. Office to evening ready.', 189.99, 'office', 'office', 'https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=500&h=600&fit=crop&q=80', 4, '["#000000", "#8B0000", "#D3D3D3"]'),
+('Mesh Sports Tank', 'Breathable design with sleek silhouette for workouts.', 59.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500&h=600&fit=crop&q=80', 3, '["#000000", "#FF69B4", "#87CEEB"]'),
+('Maxi Evening Skirt', 'Romantic and sophisticated. Perfect floor-length elegance.', 219.99, 'party', 'party', 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=600&fit=crop&q=80', 3, '["#4B0082", "#8B008B", "#DAA520"]'),
+('Linen Blend Pants', 'Breathable, wrinkle-resistant. Summer professional style.', 129.99, 'office', 'office', 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=500&h=600&fit=crop&q=80', 4, '["#F5DEB3", "#D2B48C", "#FFFFFF"]'),
+('Athleisure Hoodie', 'Luxury comfort. Perfect for gym to coffee transition.', 119.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&h=600&fit=crop&q=80', 4, '["#2F4F4F", "#708090", "#C0C0C0"]'),
+('Luxury Perfume Set', 'Signature scents. Elevate your style profile.', 149.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&h=600&fit=crop&q=80', 5, '["#8B4513", "#FFD700", "#E6E6LA"]'),
+('White Button-Up Shirt', 'Timeless essential. Endless styling possibilities.', 99.99, 'office', 'office', 'https://images.unsplash.com/photo-1603252109303-2751441dd157?w=500&h=600&fit=crop&q=80', 4, '["#FFFFFF", "#000000", "#C0C0C0"]'),
+('Backless Party Dress', 'Bold and beautiful. The ultimate statement piece.', 279.99, 'party', 'party', 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=500&h=600&fit=crop&q=80', 3, '["#8B0000", "#FF1493", "#FFB6C1"]'),
+('Sustainable Sneakers', 'Eco-friendly comfort. Perfect for everyday wear.', 129.99, 'casual', 'casual', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=600&fit=crop&q=80', 5, '["#FFFFFF", "#000000", "#696969"]'),
+('Workout Crop Top', 'High support, sleek design. Engineered for performance.', 69.99, 'gym', 'gym', 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500&h=600&fit=crop&q=80', 4, '["#000000", "#FF6B6B", "#FFB6C1"]');
 
--- Insert Blog Articles for Style Guide
+-- Insert Blog Articles for Style Guide with high-quality images
 INSERT INTO blog_articles (title, slug, content, excerpt, featured_image_url, author, category) VALUES
 (
   'Understanding Color Theory and Your Skin Tone',
@@ -54,7 +55,7 @@ Neutral undertones are lucky—you can wear nearly any color! However, you''ll s
 
 Pro tip: Check your veins under natural light. Blue veins indicate cool undertones, green suggests warm, and a mix indicates neutral. Combine this with the metal test—does silver or gold look better on you?—to confirm your undertone.',
   'Discover how to identify your skin undertone and choose colors that make you look absolutely radiant.',
-  'https://images.unsplash.com/photo-1596741834519-8d9ad2b2e3c7?w=800&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&h=400&fit=crop&q=80',
   'AuraFit AI',
   'color-theory'
 ),
@@ -75,7 +76,7 @@ The Inverted Triangle has broader shoulders and narrower hips. Horizontal stripe
 
 Remember: These are guidelines, not rules. Wear what makes you feel confident and beautiful.',
   'Learn styling principles tailored to your unique body shape and proportions.',
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&h=400&fit=crop&q=80',
   'AuraFit AI',
   'body-types'
 ),
@@ -103,7 +104,7 @@ Tips for Building a Sustainable Wardrobe:
 4. Buy secondhand when possible
 5. Care for your clothes properly to extend their lifespan',
   'Explore the fashion trends that are shaping a more sustainable industry in 2026 and beyond.',
-  'https://images.unsplash.com/photo-1579763789552-c324a96e82cf?w=800&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?w=800&h=400&fit=crop&q=80',
   'AuraFit AI',
   'sustainability'
 ),
@@ -132,7 +133,7 @@ A $50 dress that''s perfectly tailored looks more expensive than a $200 dress th
 
 Pro Tip: Every body is unique. Don''t expect the same size across all brands. Try things on, and don''t hesitate to invest in tailoring to create your perfect fit.',
   'Learn the biomechanics and science behind garment fit and how to find your perfect fit.',
-  'https://images.unsplash.com/photo-1528991435120-da109993812d?w=800&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1558769132-cb1aea3c1931?w=800&h=400&fit=crop&q=80',
   'AuraFit AI',
   'science'
 );

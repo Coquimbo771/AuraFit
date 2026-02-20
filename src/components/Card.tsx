@@ -11,8 +11,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ variant = 'glass', hover = true, className = '', children, ...props }, ref) => {
     const variantClasses = {
       glass: 'glass',
-      solid: 'bg-white shadow-lg rounded-2xl',
-      minimal: 'bg-transparent border border-sage/20 rounded-2xl',
+      solid: 'bg-white shadow-[0_20px_60px_-40px_rgba(31,26,23,0.45)] rounded-3xl border border-ink/5',
+      minimal: 'bg-transparent border border-ink/10 rounded-3xl',
     };
 
     return (
