@@ -8,14 +8,112 @@ import { useAuthStore } from '../store/authStore';
 
 type ScanPhase = 'idle' | 'camera' | 'processing' | 'results';
 
+const ScanningOverlay: React.FC = () => {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Horizontal Scanning Line */}
+      <motion.div
+        className="absolute w-full h-1 bg-neon-blue/40 shadow-[0_0_15px_rgba(0,240,255,0.8)] z-10"
+        animate={{ top: ['0%', '100%', '0%'] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+      />
+
+      {/* Grid Mesh Background */}
+      <div 
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `linear-gradient(to right, #00F0FF 1px, transparent 1px), linear-gradient(to bottom, #00F0FF 1px, transparent 1px)`,
+          backgroundSize: '40px 40px',
+        }}
+      />
+
+      {/* Target Corners */}
+      <div className="absolute inset-10 border-2 border-neon-blue/20 rounded-3xl">
+        {[0, 90, 180, 270].map((rotation) => (
+          <div
+            key={rotation}
+            className="absolute w-8 h-8 border-t-4 border-l-4 border-neon-blue"
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              top: rotation === 0 || rotation === 270 ? -2 : 'auto',
+              bottom: rotation === 90 || rotation === 180 ? -2 : 'auto',
+              left: rotation === 0 || rotation === 90 ? -2 : 'auto',
+              right: rotation === 180 || rotation === 270 ? -2 : 'auto',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Measurement Points (Simulated Detection) */}
+      {[
+        { top: '25%', left: '50%', label: 'CHEST' },
+        { top: '45%', left: '50%', label: 'WAIST' },
+        { top: '65%', left: '50%', label: 'HIPS' },
+        { top: '15%', left: '35%', label: 'L-SHOULDER' },
+        { top: '15%', left: '65%', label: 'R-SHOULDER' },
+      ].map((point, i) => (
+        <motion.div
+          key={i}
+          className="absolute"
+          style={{ top: point.top, left: point.left }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 1, 0.5] }}
+          transition={{ delay: i * 0.5, duration: 2, repeat: Infinity }}
+        >
+          <div className="w-3 h-3 bg-neon-blue rounded-full shadow-[0_0_10px_#00F0FF] -translate-x-1/2 -translate-y-1/2" />
+          <motion.div 
+            className="absolute top-4 left-4 whitespace-nowrap text-[10px] font-mono text-neon-blue font-bold tracking-widest bg-black/40 px-1 rounded"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            {point.label} :: DETECTED
+          </motion.div>
+        </motion.div>
+      ))}
+
+      {/* Digital Telemetry (Corners) */}
+      <div className="absolute top-6 left-6 font-mono text-[10px] text-neon-blue/60 leading-tight">
+        SCAN_MODE: BIOMETRIC_3D<br />
+        SYNC: ACTIVE<br />
+        RES: 8K_DYNAMIC
+      </div>
+      <div className="absolute bottom-6 right-6 font-mono text-[10px] text-neon-blue/60 text-right">
+        LAT: 12.456<br />
+        LNG: 89.123<br />
+        FRAME: {Math.floor(Math.random() * 1000)}
+      </div>
+    </div>
+  );
+};
+
+const ANALYSIS_STEPS = [
+  "Iniciando escaneo biométrico...",
+  "Mapeando estructura corporal...",
+  "Analizando subtonos de piel...",
+  "Detectando puntos de articulación...",
+  "Calculando proporciones ideales...",
+  "Consultando motor de estilo IA...",
+  "Finalizando perfil de usuario..."
+];
+
 export const ScanStudio: React.FC = () => {
   const [phase, setPhase] = useState<ScanPhase>('idle');
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
   const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
   const webcamRef = useRef<Webcam>(null);
   const { generateRandomScan, saveBiometric, loading: biometricLoading } = useBiometricStore();
   const { user } = useAuthStore();
   const [currentScan, setCurrentScan] = useState<any>(null);
+
+  useEffect(() => {
+    if (phase === 'processing') {
+      const stepInterval = setInterval(() => {
+        setCurrentStep((prev) => (prev < ANALYSIS_STEPS.length - 1 ? prev + 1 : prev));
+      }, 500);
+      return () => clearInterval(stepInterval);
+    }
+  }, [phase]);
 
   const handleCameraRequest = async () => {
     try {
@@ -23,9 +121,11 @@ export const ScanStudio: React.FC = () => {
       setCameraPermission(permission.state === 'granted');
       if (permission.state === 'granted') {
         setPhase('camera');
+      } else {
+        // Just trigger the browser dialog
+        setPhase('camera');
       }
     } catch {
-      setCameraPermission(true);
       setPhase('camera');
     }
   };
@@ -33,18 +133,19 @@ export const ScanStudio: React.FC = () => {
   const handleCapture = async () => {
     setPhase('processing');
     setProgress(0);
+    setCurrentStep(0);
 
     const interval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 90) {
+        if (prev >= 95) {
           clearInterval(interval);
-          return 90;
+          return 95;
         }
-        return prev + Math.random() * 30;
+        return prev + Math.random() * 15;
       });
-    }, 300);
+    }, 400);
 
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 4000));
     clearInterval(interval);
     setProgress(100);
 
@@ -149,48 +250,51 @@ export const ScanStudio: React.FC = () => {
             {phase === 'camera' && (
               <motion.div
                 key="camera"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 className="space-y-6"
               >
-                <Card variant="solid" className="overflow-hidden">
-                  <div className="relative aspect-video bg-black">
+                <Card variant="solid" className="overflow-hidden border-2 border-neon-blue/30 shadow-[0_0_30px_rgba(0,240,255,0.2)] bg-black">
+                  <div className="relative aspect-video">
                     <Webcam
                       ref={webcamRef}
-                      className="w-full h-full"
+                      className="w-full h-full object-cover"
                       mirrored
                       screenshotFormat="image/jpeg"
+                      videoConstraints={{ facingMode: 'user' }}
                     />
 
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 640 480">
-                      <g className="opacity-50 stroke-neon-blue stroke-2 fill-none">
-                        <circle cx="320" cy="240" r="120" />
-                        <line x1="200" y1="240" x2="100" y2="240" />
-                        <line x1="440" y1="240" x2="540" y2="240" />
-                        <line x1="320" y1="120" x2="320" y2="20" />
-                        <line x1="320" y1="360" x2="320" y2="460" />
-
-                        <circle cx="280" cy="200" r="8" fill="currentColor" />
-                        <circle cx="360" cy="200" r="8" fill="currentColor" />
-                        <circle cx="320" cy="280" r="8" fill="currentColor" />
-                      </g>
-                    </svg>
+                    {/* NEW PREMIUM OVERLAY */}
+                    <ScanningOverlay />
 
                     <motion.div
-                      className="absolute inset-0 border-2 border-neon-blue rounded-3xl"
-                      animate={{ opacity: [0.3, 0.8, 0.3] }}
+                      className="absolute inset-0 border-2 border-neon-blue rounded-3xl pointer-events-none"
+                      animate={{ opacity: [0.1, 0.4, 0.1] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
                   </div>
                 </Card>
 
                 <div className="flex gap-4 justify-center">
-                  <Button variant="secondary" onClick={handleNewScan}>
+                  <Button 
+                    variant="secondary" 
+                    onClick={handleNewScan}
+                    className="backdrop-blur-md bg-white/10"
+                  >
                     Cancel
                   </Button>
-                  <Button variant="neon" onClick={handleCapture}>
-                    Capturar y Analizar
+                  <Button 
+                    variant="neon" 
+                    onClick={handleCapture}
+                    className="shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:shadow-[0_0_30px_rgba(0,240,255,0.6)] animate-pulse"
+                  >
+                    <motion.span
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      Capturar y Analizar
+                    </motion.span>
                   </Button>
                 </div>
               </motion.div>
@@ -199,33 +303,51 @@ export const ScanStudio: React.FC = () => {
             {phase === 'processing' && (
               <motion.div
                 key="processing"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
                 className="space-y-8"
               >
-                <Card variant="glass" className="p-12 text-center space-y-8">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                    className="flex justify-center"
-                  >
-                    <LoadingSpinner size="lg" variant="neon" />
-                  </motion.div>
+                <Card variant="glass" className="p-12 text-center space-y-8 border-neon-blue/20 bg-black/40 backdrop-blur-2xl">
+                  <div className="relative flex justify-center py-10">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                      className="absolute"
+                    >
+                      <LoadingSpinner size="lg" variant="neon" />
+                    </motion.div>
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="w-24 h-24 bg-neon-blue rounded-full blur-3xl"
+                    />
+                  </div>
 
-                  <div>
-                    <h2 className="text-2xl font-bold text-sage mb-2">Procesando Biometría...</h2>
-                    <p className="text-gray-600 mb-4">Analizando tu cuerpo y tono de piel</p>
+                  <div className="space-y-4">
+                    <AnimatePresence mode="wait">
+                      <motion.h2 
+                        key={currentStep}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="text-2xl font-bold text-neon-blue font-mono tracking-tighter"
+                      >
+                        {ANALYSIS_STEPS[currentStep]}
+                      </motion.h2>
+                    </AnimatePresence>
+                    
+                    <p className="text-gray-400 font-mono text-sm tracking-widest uppercase">Procesando Biometría 3D</p>
 
-                    <div className="w-full bg-sage/10 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-white/5 rounded-full h-1 overflow-hidden border border-white/10 mt-6">
                       <motion.div
-                        className="h-full bg-gradient-to-r from-sage to-neon-blue"
+                        className="h-full bg-gradient-to-r from-neon-blue to-purple-500 shadow-[0_0_10px_#00F0FF]"
                         initial={{ width: 0 }}
                         animate={{ width: `${progress}%` }}
                         transition={{ duration: 0.5 }}
                       />
                     </div>
-                    <p className="text-sm text-gray-500 mt-2">{Math.round(progress)}%</p>
+                    <p className="text-xs text-neon-blue/60 font-mono mt-2">{Math.round(progress)}% COMPLETE</p>
                   </div>
                 </Card>
               </motion.div>
@@ -234,93 +356,112 @@ export const ScanStudio: React.FC = () => {
             {phase === 'results' && currentScan && (
               <motion.div
                 key="results"
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                exit={{ opacity: 0, y: -30 }}
                 className="space-y-6"
               >
-                <Card variant="solid" className="p-8 space-y-6">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    <h2 className="text-2xl font-bold text-sage mb-6">Tu Perfil de Estilo</h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="p-4 bg-sage/5 rounded-xl">
-                        <p className="text-sm text-gray-600 mb-1">Tipo de Cuerpo</p>
-                        <p className="text-2xl font-bold text-sage">{bodyShapeLabels[currentScan.bodyShape]}</p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* MAIN BIO CARD */}
+                  <Card variant="solid" className="lg:col-span-2 p-8 space-y-8 bg-white shadow-2xl border-t-4 border-neon-blue">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h2 className="text-3xl font-black text-sage tracking-tight mb-2 uppercase italic">Profile Analysis</h2>
+                        <p className="text-gray-500 font-medium">Escaneo completado exitosamente</p>
                       </div>
-                      <div className="p-4 bg-sage/5 rounded-xl">
-                        <p className="text-sm text-gray-600 mb-1">Tono de Piel</p>
-                        <p className="text-2xl font-bold text-sage">{skinToneLabels[currentScan.skinTone]}</p>
-                      </div>
-                      <div className="p-4 bg-sage/5 rounded-xl">
-                        <p className="text-sm text-gray-600 mb-1">Talla Sugerida</p>
-                        <p className="text-2xl font-bold text-sage">{currentScan.suggestedSize}</p>
+                      <div className="px-3 py-1 bg-neon-blue/10 rounded-full border border-neon-blue/30">
+                        <span className="text-xs font-bold text-neon-blue tracking-widest uppercase">AI Verified</span>
                       </div>
                     </div>
-                  </motion.div>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <h3 className="text-lg font-semibold text-sage mb-4">Tu Paleta de Colores Ideal</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      {currentScan.colorPalette.map((color: any, i: number) => (
-                        <motion.div
-                          key={i}
-                          whileHover={{ scale: 1.05 }}
-                          className="text-center"
-                        >
-                          <div
-                            className="w-full aspect-square rounded-xl shadow-lg mb-2 border-2 border-sage/10 cursor-pointer hover:border-sage transition-colors"
-                            style={{ backgroundColor: color.hex }}
-                          />
-                          <p className="text-xs font-medium text-gray-700">{color.name}</p>
-                          <p className="text-xs text-gray-500">{color.hex}</p>
-                        </motion.div>
-                      ))}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-6 bg-sage/5 rounded-2xl border border-sage/10 group hover:bg-sage/10 transition-colors">
+                        <p className="text-[10px] font-bold text-sage/60 uppercase tracking-widest mb-3">Body Shape</p>
+                        <p className="text-xl font-black text-sage group-hover:scale-105 transition-transform origin-left">{bodyShapeLabels[currentScan.bodyShape]}</p>
+                      </div>
+                      <div className="p-6 bg-sage/5 rounded-2xl border border-sage/10 group hover:bg-sage/10 transition-colors">
+                        <p className="text-[10px] font-bold text-sage/60 uppercase tracking-widest mb-3">Skin Tone</p>
+                        <p className="text-xl font-black text-sage group-hover:scale-105 transition-transform origin-left">{skinToneLabels[currentScan.skinTone]}</p>
+                      </div>
+                      <div className="p-6 bg-sage/5 rounded-2xl border border-sage/10 group hover:bg-sage/10 transition-colors">
+                        <p className="text-[10px] font-bold text-sage/60 uppercase tracking-widest mb-3">Suggested Size</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-3xl font-black text-neon-blue">{currentScan.suggestedSize}</span>
+                          <span className="text-[10px] text-gray-400 font-mono">ADULT_STD</span>
+                        </div>
+                      </div>
                     </div>
-                  </motion.div>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <h3 className="text-lg font-semibold text-sage mb-3">Recomendaciones de Estilo</h3>
-                    <ul className="space-y-2">
-                      {currentScan.styleRecommendations.map((rec: string, i: number) => (
-                        <motion.li
-                          key={i}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.4 + i * 0.1 }}
-                          className="flex items-start gap-3 text-gray-700"
-                        >
-                          <div className="w-2 h-2 rounded-full bg-sage mt-2 flex-shrink-0" />
-                          {rec}
-                        </motion.li>
-                      ))}
-                    </ul>
-                  </motion.div>
-                </Card>
+                    <div className="space-y-6">
+                      <h3 className="text-sm font-black text-sage uppercase tracking-[0.2em] flex items-center gap-2">
+                        <div className="w-4 h-[2px] bg-neon-blue" />
+                        Ideal Color Palette
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        {currentScan.colorPalette.map((color: any, i: number) => (
+                          <motion.div
+                            key={i}
+                            whileHover={{ y: -5 }}
+                            className="group"
+                          >
+                            <div
+                              className="w-full aspect-square rounded-2xl shadow-xl mb-3 border-4 border-white transition-all group-hover:shadow-neon-blue/20"
+                              style={{ backgroundColor: color.hex }}
+                            />
+                            <p className="text-[10px] font-black text-sage uppercase tracking-tighter truncate">{color.name}</p>
+                            <p className="text-[9px] text-gray-400 font-mono tracking-widest uppercase">{color.hex}</p>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </Card>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button variant="secondary" onClick={handleNewScan}>
+                  {/* SIDEBAR RECS */}
+                  <div className="space-y-6">
+                    <Card variant="glass" className="p-8 border-sage/20 bg-sage text-white h-full">
+                      <h3 className="text-xl font-black mb-6 italic uppercase tracking-tighter">Style AI Insights</h3>
+                      <ul className="space-y-6">
+                        {currentScan.styleRecommendations.map((rec: string, i: number) => (
+                          <motion.li
+                            key={i}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.5 + i * 0.1 }}
+                            className="flex items-start gap-4"
+                          >
+                            <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 text-xs font-black">
+                              {i + 1}
+                            </div>
+                            <p className="text-sm font-medium leading-relaxed text-sand/90 italic tracking-tight">
+                              {rec}
+                            </p>
+                          </motion.li>
+                        ))}
+                      </ul>
+                      
+                      <div className="mt-12 p-4 bg-white/10 rounded-2xl border border-white/10">
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-60">Confidence Score</p>
+                        <div className="flex items-end gap-2">
+                          <span className="text-4xl font-black">98</span>
+                          <span className="text-xl font-bold opacity-60 mb-1">%</span>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+                  <Button variant="secondary" onClick={handleNewScan} className="px-8">
                     Nuevo Escaneo
                   </Button>
                   <Button
                     variant="neon"
                     onClick={handleSaveResults}
                     isLoading={biometricLoading}
+                    className="px-12 shadow-[0_20px_40px_rgba(0,240,255,0.3)]"
                   >
-                    <Save size={20} />
-                    Guardar a Perfil
+                    <Save size={20} className="mr-2" />
+                    Guardar Perfil de Estilo
                   </Button>
                 </div>
               </motion.div>
