@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BlogArticleCard, PageTransition, Skeleton, Modal } from '../components';
+import { BlogArticleCard, PageTransition, Skeleton, Modal, Footer } from '../components';
 import { supabase } from '../lib/supabase';
 import type { BlogArticle } from '../types';
 
@@ -143,6 +143,7 @@ export const StyleGuide: React.FC = () => {
           )}
         </Modal>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

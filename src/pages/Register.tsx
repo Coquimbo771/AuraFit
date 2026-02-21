@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Check } from 'lucide-react';
-import { Button, Input, PageTransition } from '../components';
+import { Button, Input, PageTransition, Footer } from '../components';
 import { useAuthStore } from '../store/authStore';
 import type { UserRole } from '../types';
 
@@ -226,6 +226,7 @@ export const Register: React.FC = () => {
           </motion.div>
         </div>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

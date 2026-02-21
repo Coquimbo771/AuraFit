@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LogOut, Edit, Camera, Heart, TrendingUp, Leaf } from 'lucide-react';
-import { Button, Card, PageTransition, Skeleton } from '../components';
+import { Button, Card, PageTransition, Skeleton, Footer } from '../components';
 import { useAuthStore } from '../store/authStore';
 import { useBiometricStore } from '../store/biometricStore';
 import { useShoppingStore } from '../store/shoppingStore';
@@ -324,6 +324,7 @@ export const Dashboard: React.FC = () => {
           </motion.div>
         </div>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

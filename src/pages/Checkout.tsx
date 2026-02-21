@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Minus, Plus, ShoppingCart, CreditCard } from 'lucide-react';
-import { Button, Card, Input, PageTransition } from '../components';
+import { Button, Card, Input, PageTransition, Footer } from '../components';
 import { useShoppingStore } from '../store/shoppingStore';
 import { useAuthStore } from '../store/authStore';
 import { supabase } from '../lib/supabase';
@@ -82,12 +82,20 @@ export const Checkout: React.FC = () => {
 
   const handlePlaceOrder = async () => {
     if (!user) {
+      alert('Debes iniciar sesión para realizar un pedido.');
       navigate('/login');
       return;
     }
 
+    // Validar campos obligatorios
     if (!addressForm.fullName || !addressForm.phone || !addressForm.city || !addressForm.addressLine1 || !addressForm.postalCode) {
-      alert('Completa los datos de envio obligatorios.');
+      alert('Por favor, completa todos los campos obligatorios de envío (Nombre, Teléfono, Ciudad, Dirección y Código postal).');
+      return;
+    }
+
+    // Validar que el carrito no esté vacío
+    if (cart.length === 0) {
+      alert('Tu carrito está vacío.');
       return;
     }
 
@@ -97,12 +105,15 @@ export const Checkout: React.FC = () => {
     try {
       const orderId = await createOrder(user.id);
       if (orderId) {
-        alert(`Pedido creado correctamente: ${orderId}`);
+        alert(`¡Pedido creado exitosamente!\n\nID del pedido: ${orderId}\n\nSerás redirigido a tu dashboard.`);
         navigate('/dashboard');
+      } else {
+        alert('No se pudo crear el pedido. Por favor, intenta nuevamente.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating order:', error);
-      alert('No se pudo crear el pedido. Revisa configuración de tablas orders/order_items.');
+      const errorMessage = error?.message || 'Error desconocido';
+      alert(`Error al crear el pedido:\n\n${errorMessage}\n\nPor favor, verifica tu conexión y vuelve a intentar.`);
     } finally {
       setPlacingOrder(false);
     }
@@ -211,6 +222,7 @@ export const Checkout: React.FC = () => {
           )}
         </div>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

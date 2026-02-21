@@ -10,3 +10,4 @@ export { ProductCard } from './ProductCard';
 export { BlogArticleCard } from './BlogArticleCard';
 export { PredictiveInput } from './PredictiveInput';
 export { PersonalizedRecommendations } from './PersonalizedRecommendations';
+export { Footer } from './Footer';

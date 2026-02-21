@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Sliders, Search, ArrowUpDown } from 'lucide-react';
-import { ProductCard, PageTransition, Skeleton, Button, Badge, PredictiveInput, PersonalizedRecommendations } from '../components';
+import { ProductCard, PageTransition, Skeleton, Button, Badge, PredictiveInput, PersonalizedRecommendations, Footer } from '../components';
 import { useShoppingStore } from '../store/shoppingStore';
 import { useAuthStore } from '../store/authStore';
 import { useBehaviorStore } from '../store/behaviorStore';
 import { supabase } from '../lib/supabase';
 import { semanticSearch } from '../lib/recommendations';
+import { useDebounce } from '../hooks/useDebounce';
 import type { Product, ProductCategory } from '../types';
 
 export const Marketplace: React.FC = () => {
@@ -29,6 +30,9 @@ export const Marketplace: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState<'match' | 'price-asc' | 'price-desc' | 'sustainable'>('match');
+  
+  // Debounce search query for better performance
+  const debouncedQuery = useDebounce(query, 400);
 
   const occasions: ProductCategory[] = ['office', 'gym', 'party', 'casual'];
 
@@ -54,13 +58,14 @@ export const Marketplace: React.FC = () => {
     }
   }, [user, fetchSavedItems]);
 
+  // Memoize filtered and sorted products
   useEffect(() => {
     let filtered = [...products];
 
     // Smart semantic search (if query present)
-    if (query.trim()) {
-      filtered = semanticSearch(query, products);
-      trackSearch(query); // Track search for ML
+    if (debouncedQuery.trim()) {
+      filtered = semanticSearch(debouncedQuery, products);
+      trackSearch(debouncedQuery); // Track search for ML
     } else {
       // Regular filters
       if (filters.occasion.length > 0) {
@@ -81,16 +86,16 @@ export const Marketplace: React.FC = () => {
     });
 
     setFilteredProducts(sorted);
-  }, [products, filters, query, sortBy, trackSearch]);
+  }, [products, filters, debouncedQuery, sortBy, trackSearch]);
 
   const activeFilterLabels = useMemo(() => {
     const labels: string[] = [];
     if (filters.occasion.length > 0) labels.push(`Ocasiones: ${filters.occasion.join(', ')}`);
     if (filters.sustainabilityMin > 1) labels.push(`Sostenibilidad ${filters.sustainabilityMin}★+`);
     if (filters.priceRange[1] < 1000) labels.push(`Hasta $${filters.priceRange[1]}`);
-    if (query.trim()) labels.push(`Busqueda: ${query.trim()}`);
+    if (debouncedQuery.trim()) labels.push(`Búsqueda: ${debouncedQuery.trim()}`);
     return labels;
-  }, [filters, query]);
+  }, [filters, debouncedQuery]);
 
   const predictiveSuggestions = useMemo(() => {
     const keywordPool = new Set<string>([
@@ -124,30 +129,30 @@ export const Marketplace: React.FC = () => {
     }));
   }, [products]);
 
-  const handleOccasionChange = (occasion: ProductCategory) => {
+  const handleOccasionChange = useCallback((occasion: ProductCategory) => {
     const newOccasions = filters.occasion.includes(occasion)
       ? filters.occasion.filter((o) => o !== occasion)
       : [...filters.occasion, occasion];
     setOccasionFilter(newOccasions);
-  };
+  }, [filters.occasion, setOccasionFilter]);
 
-  const handleAddToWardrobe = async (productId: string) => {
+  const handleAddToWardrobe = useCallback(async (productId: string) => {
     if (!user) return;
     try {
       await addToWardrobe(user.id, productId);
     } catch (error) {
       console.error('Error adding to wardrobe:', error);
     }
-  };
+  }, [user, addToWardrobe]);
 
-  const handleRemoveFromWardrobe = async (productId: string) => {
+  const handleRemoveFromWardrobe = useCallback(async (productId: string) => {
     if (!user) return;
     try {
       await removeFromWardrobe(user.id, productId);
     } catch (error) {
       console.error('Error removing from wardrobe:', error);
     }
-  };
+  }, [user, removeFromWardrobe]);
 
   return (
     <PageTransition>
@@ -388,6 +393,7 @@ export const Marketplace: React.FC = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

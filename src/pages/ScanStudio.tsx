@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Save, Sparkles, Upload } from 'lucide-react';
 import Webcam from 'react-webcam';
-import { Button, PageTransition, LoadingSpinner, Card } from '../components';
+import { Button, PageTransition, LoadingSpinner, Card, Footer } from '../components';
 import { useBiometricStore } from '../store/biometricStore';
 import { useAuthStore } from '../store/authStore';
 import { analyzeImage, validateImageQuality } from '../lib/imageAnalysis';
@@ -459,6 +459,7 @@ export const ScanStudio: React.FC = () => {
           </AnimatePresence>
         </div>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

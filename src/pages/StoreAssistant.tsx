@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Bot, SendHorizonal, Sparkles } from 'lucide-react';
-import { Button, Card, PageTransition, PredictiveInput } from '../components';
+import { Button, Card, PageTransition, PredictiveInput, Footer } from '../components';
 import { askStoreAssistant, type BotMessage } from '../lib/bot';
 
 const starterPrompts = [
@@ -139,6 +139,7 @@ export const StoreAssistant: React.FC = () => {
           </Card>
         </div>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

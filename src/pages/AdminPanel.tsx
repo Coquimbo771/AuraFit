@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Package, Users, Bot } from 'lucide-react';
-import { Card, PageTransition, Button } from '../components';
+import { Card, PageTransition, Button, Footer } from '../components';
 import { useAuthStore } from '../store/authStore';
 import { Navigate, useNavigate } from 'react-router-dom';
 
@@ -57,6 +57,7 @@ export const AdminPanel: React.FC = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

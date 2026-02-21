@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Target, ShoppingBag, TrendingUp, Zap } from 'lucide-react';
-import { Button, Card, PageTransition, Badge } from '../components';
+import { Button, Card, PageTransition, Badge, Footer } from '../components';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -316,6 +316,7 @@ export const Home: React.FC = () => {
           </Card>
         </motion.section>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

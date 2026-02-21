@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock } from 'lucide-react';
-import { Button, Input, PageTransition } from '../components';
+import { Button, Input, PageTransition, Footer } from '../components';
 import { useAuthStore } from '../store/authStore';
 import { supabase } from '../lib/supabase';
 
@@ -150,6 +150,7 @@ export const Login: React.FC = () => {
           </motion.div>
         </div>
       </div>
+      <Footer />
     </PageTransition>
   );
 };
