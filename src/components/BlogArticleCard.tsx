@@ -45,10 +45,10 @@ export const BlogArticleCard: React.FC<BlogArticleCardProps> = ({ article, onCli
       className="cursor-pointer h-full"
     >
       <Card variant="solid" hover={false} className="overflow-hidden h-full flex flex-col">
-        <div className="relative overflow-hidden bg-gradient-to-br from-sun/30 to-ember/10 h-48">
+        <div className="relative overflow-hidden bg-gradient-to-br from-sun/30 to-ember/10 h-40 sm:h-44 md:h-48">
           {imageLoading && !imageError && (
             <div className="absolute inset-0 flex items-center justify-center bg-sand/30 animate-pulse">
-              <div className="w-10 h-10 border-4 border-ember/30 border-t-ember rounded-full animate-spin" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 border-3 sm:border-4 border-ember/30 border-t-ember rounded-full animate-spin" />
             </div>
           )}
           <img
@@ -59,24 +59,24 @@ export const BlogArticleCard: React.FC<BlogArticleCardProps> = ({ article, onCli
             className={`w-full h-full object-cover transition-all duration-300 hover:scale-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/40 to-transparent" />
-          <div className="absolute top-4 left-4">
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
             <Badge label={categoryLabels[article.category] || article.category} variant="info" />
           </div>
         </div>
 
-        <div className="p-5 flex-1 flex flex-col justify-between">
+        <div className="p-3 sm:p-4 md:p-5 flex-1 flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-lg text-ink mb-2 line-clamp-2">{article.title}</h3>
-            <p className="text-sm text-ink/70 mb-4 line-clamp-3">{article.excerpt || article.content.substring(0, 100)}...</p>
+            <h3 className="font-bold text-base sm:text-lg text-ink mb-2 line-clamp-2 leading-snug">{article.title}</h3>
+            <p className="text-xs sm:text-sm text-ink/70 mb-3 sm:mb-4 line-clamp-3 leading-relaxed">{article.excerpt || article.content.substring(0, 100)}...</p>
           </div>
 
-          <div className="border-t border-ink/10 pt-4 flex items-center justify-between">
-            <div className="text-xs text-ink/50">
-              <p className="font-medium text-ink mb-1">{article.author}</p>
+          <div className="border-t border-ink/10 pt-3 sm:pt-4 flex items-center justify-between">
+            <div className="text-[10px] sm:text-xs text-ink/50">
+              <p className="font-medium text-ink mb-0.5 sm:mb-1 text-xs sm:text-sm">{article.author}</p>
               <p>{readingTime} min read</p>
             </div>
             <motion.div whileHover={{ x: 4 }} className="text-ink">
-              <ArrowRight size={20} />
+              <ArrowRight size={18} className="sm:w-[20px] sm:h-[20px]" />
             </motion.div>
           </div>
         </div>

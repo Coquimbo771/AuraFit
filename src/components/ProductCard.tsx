@@ -71,10 +71,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       className="cursor-pointer"
     >
       <Card variant="solid" hover={false} className="overflow-hidden h-full flex flex-col">
-        <div className="relative overflow-hidden bg-gradient-to-br from-sun/20 via-sand/20 to-ember/10 h-64">
+        <div className="relative overflow-hidden bg-gradient-to-br from-sun/20 via-sand/20 to-ember/10 h-48 sm:h-56 md:h-64">
           {imageLoading && !imageError && (
             <div className="absolute inset-0 flex items-center justify-center bg-sand/30 animate-pulse">
-              <div className="w-12 h-12 border-4 border-ember/30 border-t-ember rounded-full animate-spin" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border-3 sm:border-4 border-ember/30 border-t-ember rounded-full animate-spin" />
             </div>
           )}
           <img
@@ -89,22 +89,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleHeartClick}
-            className={`absolute top-4 right-4 p-2 rounded-full transition-colors duration-200 ${
+            className={`absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 sm:p-2 rounded-full transition-colors duration-200 ${
               showSaved ? 'bg-rose-500 text-white' : 'bg-white/90 text-ink hover:bg-white'
             }`}
           >
-            <Heart size={20} fill={showSaved ? 'currentColor' : 'none'} />
+            <Heart size={16} className="sm:w-[18px] sm:h-[18px] md:w-[20px] md:h-[20px]" fill={showSaved ? 'currentColor' : 'none'} />
           </motion.button>
         </div>
 
-        <div className="p-5 flex-1 flex flex-col justify-between">
+        <div className="p-3 sm:p-4 md:p-5 flex-1 flex flex-col justify-between">
           <div>
-            <div className="flex items-start justify-between mb-3">
-              <h3 className="font-semibold text-ink text-lg line-clamp-2">{product.name}</h3>
+            <div className="flex items-start justify-between mb-2 sm:mb-3">
+              <h3 className="font-semibold text-ink text-sm sm:text-base md:text-lg line-clamp-2">{product.name}</h3>
             </div>
-            <p className="text-sm text-ink/70 mb-4 line-clamp-2">{product.description}</p>
+            <p className="text-xs sm:text-sm text-ink/70 mb-3 sm:mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
 
-            <div className="flex gap-2 mb-4 flex-wrap">
+            <div className="flex gap-1.5 sm:gap-2 mb-3 sm:mb-4 flex-wrap">
               <Badge label={`${matchScore}% Match`} variant={getMatchColor(matchScore)} />
               {product.occasion && (
                 <Badge label={product.occasion} variant="info" />
@@ -112,16 +112,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </div>
           </div>
 
-          <div className="border-t border-ink/10 pt-4">
+          <div className="border-t border-ink/10 pt-3 sm:pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-ink">${product.price.toFixed(2)}</p>
-                <div className="flex items-center gap-1 text-xs text-amber-700">
+                <p className="text-xl sm:text-2xl font-bold text-ink">${product.price.toFixed(2)}</p>
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-amber-700">
                   {'★'.repeat(Math.floor(product.sustainable_rating))}
                   <span className="text-ink/50">Sostenibilidad</span>
                 </div>
               </div>
-              <div className="text-right text-xs text-ink/50">
+              <div className="text-right text-[10px] sm:text-xs text-ink/50">
                 {product.sizes_available?.length} sizes
               </div>
             </div>

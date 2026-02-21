@@ -151,40 +151,40 @@ export const Marketplace: React.FC = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gradient-to-b from-sand-50 via-sand to-white pt-24 pb-12 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-sand-50 via-sand to-white dark:from-dark-950 dark:via-dark-900 dark:to-dark-850 pt-16 sm:pt-20 md:pt-24 pb-8 sm:pb-12 px-3 sm:px-4 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-10"
+            className="mb-6 sm:mb-8 md:mb-10"
           >
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 sm:gap-6">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-ink/50">Marketplace</p>
-                <h1 className="text-4xl md:text-5xl font-bold text-ink mb-3">Encuentra tu match perfecto</h1>
-                <p className="text-ink/70 text-lg">
+                <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-ink/50 dark:text-sand-50/50">Marketplace</p>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-ink dark:text-sand-50 mb-2 sm:mb-3">Encuentra tu match perfecto</h1>
+                <p className="text-ink/70 dark:text-sand-50/70 text-sm sm:text-base lg:text-lg leading-relaxed">
                   Piezas curadas por fit, colorimetria y sostenibilidad. Compra con menos devoluciones.
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/40" size={18} />
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                <div className="relative flex-1 sm:flex-initial">
+                  <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-ink/40 dark:text-sand-50/40" size={16} />
                   <PredictiveInput
                     value={query}
                     onChange={setQuery}
                     onSubmit={() => undefined}
                     suggestions={predictiveSuggestions}
                     placeholder="Buscar por nombre, color o ocasion"
-                    className="w-72 max-w-full"
-                    inputClassName="w-full pl-11 pr-4 py-3 rounded-2xl border border-ink/10 bg-white/80 focus:outline-none focus:border-ember"
+                    className="w-full sm:w-64 lg:w-72"
+                    inputClassName="w-full pl-9 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl border border-ink/10 dark:border-neon-blue/20 bg-white/80 dark:bg-dark-700/80 text-sm sm:text-base text-ink dark:text-sand-50 focus:outline-none focus:border-ember dark:focus:border-neon-blue"
                   />
                 </div>
-                <div className="flex items-center gap-2 border border-ink/10 rounded-2xl px-3 py-2 bg-white/80">
-                  <ArrowUpDown size={16} className="text-ink/50" />
+                <div className="flex items-center gap-2 border border-ink/10 dark:border-neon-blue/20 rounded-xl sm:rounded-2xl px-2 sm:px-3 py-2 bg-white/80 dark:bg-dark-700/80">
+                  <ArrowUpDown size={14} className="text-ink/50 dark:text-sand-50/50 sm:w-4 sm:h-4" />
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                    className="bg-transparent text-sm font-semibold text-ink/70 focus:outline-none"
+                    className="bg-transparent text-xs sm:text-sm font-semibold text-ink/70 dark:text-sand-50/70 focus:outline-none"
                   >
                     <option value="match">Mejor match</option>
                     <option value="price-asc">Precio menor</option>
@@ -196,49 +196,49 @@ export const Marketplace: React.FC = () => {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className={`lg:block ${showFilters ? 'block' : 'hidden'} lg:sticky lg:top-4 h-fit`}
+              className={`lg:block ${showFilters ? 'block' : 'hidden'} lg:sticky lg:top-20 h-fit`}
             >
-              <div className="bg-white rounded-3xl p-6 shadow-[0_24px_60px_-40px_rgba(31,26,23,0.5)] border border-ink/5">
-                <h3 className="text-lg font-bold text-ink mb-6 flex items-center gap-2">
-                  <Sliders size={20} />
+              <div className="bg-white dark:bg-dark-800/50 rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 shadow-[0_24px_60px_-40px_rgba(31,26,23,0.5)] dark:shadow-[0_24px_60px_-20px_rgba(0,240,255,0.2)] border border-ink/5 dark:border-neon-blue/20 backdrop-blur-xl">
+                <h3 className="text-base sm:text-lg font-bold text-ink dark:text-sand-50 mb-4 sm:mb-6 flex items-center gap-2">
+                  <Sliders size={18} className="sm:w-[20px] sm:h-[20px]" />
                   Filtros
                 </h3>
 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <div>
-                    <h4 className="font-semibold text-ink mb-3">Ocasion</h4>
-                    <div className="space-y-2">
+                    <h4 className="font-semibold text-ink dark:text-sand-50 mb-2 sm:mb-3 text-sm sm:text-base">Ocasion</h4>
+                    <div className="space-y-1.5 sm:space-y-2">
                       {occasions.map((occasion) => (
-                        <label key={occasion} className="flex items-center gap-2 cursor-pointer">
+                        <label key={occasion} className="flex items-center gap-2 cursor-pointer group">
                           <input
                             type="checkbox"
                             checked={filters.occasion.includes(occasion)}
                             onChange={() => handleOccasionChange(occasion)}
-                            className="w-4 h-4 accent-ember rounded"
+                            className="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-ember dark:accent-neon-blue rounded"
                           />
-                          <span className="text-ink/70 capitalize">{occasion}</span>
+                          <span className="text-ink/70 dark:text-sand-50/70 capitalize text-xs sm:text-sm group-hover:text-ink dark:group-hover:text-sand-50 transition-colors">{occasion}</span>
                         </label>
                       ))}
                     </div>
                   </div>
 
-                  <div className="border-t border-ink/10 pt-4">
-                    <h4 className="font-semibold text-ink mb-3">Sostenibilidad</h4>
-                    <div className="flex gap-1">
+                  <div className="border-t border-ink/10 dark:border-sand-50/10 pt-3 sm:pt-4">
+                    <h4 className="font-semibold text-ink dark:text-sand-50 mb-2 sm:mb-3 text-sm sm:text-base">Sostenibilidad</h4>
+                    <div className="flex gap-1 sm:gap-1.5">
                       {[1, 2, 3, 4, 5].map((rating) => (
                         <motion.button
                           key={rating}
                           whileHover={{ scale: 1.1 }}
                           onClick={() => setSustainabilityFilter(rating)}
-                          className={`flex-1 py-2 rounded transition-colors ${
+                          className={
                             filters.sustainabilityMin === rating
-                              ? 'bg-ember text-ink'
-                              : 'bg-ink/5 text-ink/70 hover:bg-ink/10'
-                          }`}
+                              ? 'flex-1 py-1.5 sm:py-2 rounded text-sm sm:text-base transition-colors bg-ember dark:bg-neon-blue text-ink dark:text-dark-950'
+                              : 'flex-1 py-1.5 sm:py-2 rounded text-sm sm:text-base transition-colors bg-ink/5 dark:bg-dark-700 text-ink/70 dark:text-sand-50/70 hover:bg-ink/10 dark:hover:bg-dark-600'
+                          }
                         >
                           ★
                         </motion.button>
@@ -246,18 +246,18 @@ export const Marketplace: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="border-t border-ink/10 pt-4">
-                    <h4 className="font-semibold text-ink mb-3">Rango de precio</h4>
-                    <div className="space-y-3">
+                  <div className="border-t border-ink/10 dark:border-sand-50/10 pt-3 sm:pt-4">
+                    <h4 className="font-semibold text-ink dark:text-sand-50 mb-2 sm:mb-3 text-sm sm:text-base">Rango de precio</h4>
+                    <div className="space-y-2 sm:space-y-3">
                       <input
                         type="range"
                         min="0"
                         max="1000"
                         value={filters.priceRange[1]}
                         onChange={(e) => setPriceRange(0, parseInt(e.target.value))}
-                        className="w-full accent-ember"
+                        className="w-full accent-ember dark:accent-neon-blue"
                       />
-                      <p className="text-sm text-ink/60">
+                      <p className="text-xs sm:text-sm text-ink/60 dark:text-sand-50/60">
                         ${filters.priceRange[0]} - ${filters.priceRange[1]}
                       </p>
                     </div>
@@ -267,12 +267,12 @@ export const Marketplace: React.FC = () => {
             </motion.div>
 
             <div className="lg:col-span-3">
-              <div className="flex flex-wrap items-center gap-2 mb-4">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                 {['oficina elegante', 'party look', 'sostenible', 'tallas inclusivas'].map((smartTag) => (
                   <button
                     key={smartTag}
                     onClick={() => setQuery(smartTag)}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-full border border-ink/15 bg-white/70 text-ink/70 hover:text-ink"
+                    className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-full border border-ink/15 dark:border-neon-blue/20 bg-white/70 dark:bg-dark-700/70 text-ink/70 dark:text-sand-50/70 hover:text-ink dark:hover:text-sand-50 hover:bg-white dark:hover:bg-dark-700 transition-colors"
                   >
                     {smartTag}
                   </button>
@@ -282,14 +282,14 @@ export const Marketplace: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setShowFilters(!showFilters)}
-                className="lg:hidden mb-6 flex items-center gap-2 px-4 py-2 bg-ember text-ink rounded-full font-semibold"
+                className="lg:hidden mb-4 sm:mb-6 flex items-center gap-2 px-4 py-2.5 bg-ember dark:bg-neon-blue text-ink dark:text-dark-950 rounded-full font-semibold text-sm shadow-lg transition-all"
               >
                 <Sliders size={16} />
                 Filtros
               </motion.button>
 
               {activeFilterLabels.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2 mb-6">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
                   {activeFilterLabels.map((label) => (
                     <Badge key={label} label={label} variant="primary" />
                   ))}
@@ -300,7 +300,7 @@ export const Marketplace: React.FC = () => {
                       setPriceRange(0, 1000);
                       setQuery('');
                     }}
-                    className="text-sm font-semibold text-ink/60 hover:text-ink"
+                    className="text-xs sm:text-sm font-semibold text-ink/60 dark:text-sand-50/60 hover:text-ink dark:hover:text-sand-50 transition-colors"
                   >
                     Limpiar todo
                   </button>
@@ -308,16 +308,17 @@ export const Marketplace: React.FC = () => {
               )}
 
               {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                   {[...Array(6)].map((_, i) => (
                     <Skeleton key={i} type="card" />
                   ))}
                 </div>
               ) : filteredProducts.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-ink/70 text-lg mb-4">No hay productos con esos filtros</p>
+                <div className="text-center py-8 sm:py-12">
+                  <p className="text-ink/70 dark:text-sand-50/70 text-base sm:text-lg mb-3 sm:mb-4">No hay productos con esos filtros</p>
                   <Button
                     variant="secondary"
+                    size="md"
                     onClick={() => {
                       setOccasionFilter([]);
                       setSustainabilityFilter(1);
@@ -341,7 +342,7 @@ export const Marketplace: React.FC = () => {
                       },
                     },
                   }}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6"
                 >
                   {filteredProducts.map((product, i) => (
                     <motion.div
@@ -350,6 +351,7 @@ export const Marketplace: React.FC = () => {
                         hidden: { opacity: 0, y: 20 },
                         visible: { opacity: 1, y: 0 },
                       }}
+                      className="flex flex-col h-full"
                     >
                       <ProductCard
                         product={product}
@@ -363,6 +365,7 @@ export const Marketplace: React.FC = () => {
                       />
                       <Button
                         variant="primary"
+                        size="md"
                         className="w-full mt-3"
                         onClick={() => addToCart(product.id, 1)}
                       >

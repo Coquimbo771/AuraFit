@@ -6,7 +6,12 @@
 
 @layer base {
   body {
-    @apply bg-sand-50 text-ink;
+    @apply bg-sand-50 text-ink transition-colors duration-300;
+  }
+  
+  body.dark {
+    @apply bg-gradient-to-br from-dark-950 via-dark-900 to-dark-850 text-sand-50;
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4 {
@@ -18,29 +23,68 @@
   .glass {
     @apply bg-white/70 backdrop-blur-xl border border-ink/10 rounded-3xl shadow-[0_20px_60px_-40px_rgba(31,26,23,0.45)];
   }
+  
+  .dark .glass {
+    @apply bg-dark-800/40 border-neon-blue/20 shadow-[0_20px_60px_-20px_rgba(0,240,255,0.15)];
+    backdrop-filter: blur(20px);
+  }
 
   .glass-dark {
     @apply bg-ink/50 backdrop-blur-xl border border-white/10 rounded-3xl;
+  }
+  
+  .dark .glass-dark {
+    @apply bg-dark-700/30 border-neon-purple/20;
   }
 
   .btn-primary {
     @apply px-6 py-3 rounded-full bg-ember text-ink font-semibold transition-all duration-300 hover:bg-ember-600 active:scale-95 shadow-[0_12px_30px_-12px_rgba(255,107,53,0.6)];
   }
+  
+  .dark .btn-primary {
+    @apply bg-gradient-to-r from-ember to-ember-700 text-sand-50 shadow-[0_12px_30px_-12px_rgba(255,107,53,0.8)] hover:shadow-[0_20px_40px_-12px_rgba(255,107,53,1)] hover:scale-105;
+  }
 
   .btn-neon {
     @apply px-6 py-3 rounded-full bg-sun text-ink font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-sun/50 active:scale-95;
+  }
+  
+  .dark .btn-neon {
+    @apply bg-gradient-to-r from-neon-blue to-neon-blue-light text-dark-950 shadow-[0_12px_30px_-12px_rgba(0,240,255,0.6)] hover:shadow-[0_20px_40px_-12px_rgba(0,240,255,1)];
   }
 
   .btn-secondary {
     @apply px-6 py-3 rounded-full border-2 border-ink/30 text-ink font-semibold transition-all duration-300 hover:bg-ink/5 active:scale-95;
   }
+  
+  .dark .btn-secondary {
+    @apply border-neon-blue/40 text-sand-50 hover:bg-neon-blue/10 hover:border-neon-blue/60 hover:shadow-[0_0_20px_rgba(0,240,255,0.3)];
+  }
 
   .glow-neon {
     @apply shadow-lg shadow-neon-blue/30;
+  }
+  
+  .dark .glow-neon {
+    @apply shadow-[0_0_30px_rgba(0,240,255,0.6)] animate-pulse-glow;
   }
 
   .grain {
     background-image: radial-gradient(rgba(31, 26, 23, 0.06) 1px, transparent 0);
     background-size: 6px 6px;
+  }
+  
+  .dark .grain {
+    background-image: radial-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 0);
+    background-size: 8px 8px;
+  }
+  
+  .gradient-dark-glow {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  }
+  
+  .card-dark-glow {
+    @apply dark:bg-gradient-to-br dark:from-dark-800/50 dark:to-dark-900/50 dark:border-neon-blue/20;
+    @apply dark:shadow-[0_8px_32px_rgba(0,240,255,0.1)];
   }
 }
