@@ -34,12 +34,12 @@ export const Login: React.FC = () => {
 
     try {
       await signIn(email, password);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      const role = user?.user_metadata?.role;
-      navigate(role === 'admin' ? '/admin' : '/dashboard');
+      // Wait for store to update or get fresh state
+      const user = useAuthStore.getState().user;
+      
+      if (user) {
+        navigate(user.role === 'admin' ? '/admin' : '/dashboard');
+      }
     } catch (err) {
       console.error('Login error:', err);
     }

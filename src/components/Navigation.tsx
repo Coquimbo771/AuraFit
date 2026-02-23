@@ -25,15 +25,15 @@ const navItems: NavItem[] = [
 export const Navigation: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, signOut } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
   const cartCount = useShoppingStore((state) => state.cart.reduce((sum, item) => sum + item.quantity, 0));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
     setMobileMenuOpen(false);
     setUserMenuOpen(false);
