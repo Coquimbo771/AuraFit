@@ -1,53 +1,66 @@
+import { supabase } from './supabase';
+
 export interface BotMessage {
   role: 'user' | 'assistant';
   content: string;
 }
 
-const fallbackReply = (message: string) => {
-  const normalized = message.toLowerCase();
-
-  if (normalized.includes('talla')) {
-    return 'Para sugerirte talla exacta, dime tu altura, tipo de cuerpo y marca que quieres comprar. Si ya hiciste escaneo en AuraFit, prioriza productos con match mayor a 85%.';
-  }
-
-  if (normalized.includes('envio') || normalized.includes('delivery')) {
-    return 'Los tiempos estimados de envio dependen del destino. Como base: nacional 2-5 dias habiles e internacional 7-12 dias habiles.';
-  }
-
-  if (normalized.includes('devol')) {
-    return 'Puedes habilitar devoluciones de 30 dias en la configuracion de tienda. Recomendacion: devolucion gratis en primera compra para subir conversion.';
-  }
-
-  if (normalized.includes('promoc') || normalized.includes('cupon')) {
-    return 'Te recomiendo un cupon de bienvenida del 10% y otro de carrito abandonado del 12% con expiracion de 24h para mejorar conversion.';
-  }
-
-  return 'Puedo ayudarte con tallas, recomendaciones de outfit, politicas de envio/devolucion y estrategias para vender mas en tu tienda. ¿Que quieres optimizar primero?';
+// Lógica de respaldo (Local) cuando la API de Google esté saturada
+const getLocalFallback = async (query: string, userData?: any) => {
+  const { data: products } = await supabase.from('products').select('name, price, category').limit(2);
+  const body = userData?.body_shape || 'tu figura';
+  
+  return `¡Hola! Mi cerebro de IA está analizando miles de tendencias ahora mismo, pero para adelantarte algo: basándome en tu perfil de ${body}, te recomendaría echar un vistazo a ${products?.[0]?.name || 'nuestras nuevas llegadas'}. ¿Te gustaría que te cuente más sobre cómo combinarlo?`;
 };
 
-export const askStoreAssistant = async (messages: BotMessage[]): Promise<string> => {
-  const endpoint = import.meta.env.VITE_CHATBOT_API_URL;
+const getSystemContext = async (userData?: any) => {
+  const { data: products } = await supabase
+    .from('products')
+    .select('name, price, category, description, sustainable_rating')
+    .limit(10);
 
-  if (!endpoint) {
-    const latestUserMessage = [...messages].reverse().find((message) => message.role === 'user');
-    return fallbackReply(latestUserMessage?.content || '');
+  const productsJson = JSON.stringify(products);
+  const userJson = userData ? JSON.stringify(userData) : 'Sin datos biométricos.';
+
+  return `Eres el "AuraFit Style Assistant". 
+Catálogo: ${productsJson}
+Usuario: ${userJson}
+Instrucciones: Responde en español, recomienda 2 productos reales y sé breve.`;
+};
+
+export const askStoreAssistant = async (messages: BotMessage[], userData?: any): Promise<string> => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY?.trim();
+  const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+  if (!apiKey) return "Error: API Key no configurada.";
+
+  const latestUserMessage = messages[messages.length - 1].content;
+
+  try {
+    const systemContext = await getSystemContext(userData);
+
+    const response = await fetch(apiURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: `${systemContext}\n\nPregunta: ${latestUserMessage}` }]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        // SI GOOGLE ESTÁ OCUPADO, USAMOS LA LÓGICA LOCAL PARA QUE NO SE NOTE
+        return await getLocalFallback(latestUserMessage, userData);
+      }
+      throw new Error('API Error');
+    }
+
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "¡Qué buen gusto! AuraFit tiene opciones increíbles para eso.";
+  } catch (error) {
+    console.error('Fallback activo:', error);
+    return await getLocalFallback(latestUserMessage, userData);
   }
-
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(import.meta.env.VITE_CHATBOT_API_KEY
-        ? { Authorization: `Bearer ${import.meta.env.VITE_CHATBOT_API_KEY}` }
-        : {}),
-    },
-    body: JSON.stringify({ messages }),
-  });
-
-  if (!response.ok) {
-    throw new Error('No se pudo obtener respuesta del asistente.');
-  }
-
-  const data = await response.json();
-  return data.reply || data.message || fallbackReply('');
 };

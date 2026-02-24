@@ -14,6 +14,7 @@
     "perf": "npm run build && npm run preview"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.57.4",
     "framer-motion": "^12.34.0",
     "lucide-react": "^0.344.0",
