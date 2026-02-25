@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bot, SendHorizonal, Sparkles, Shirt } from 'lucide-react';
+import { Bot, SendHorizonal, Sparkles, Shirt, ScanLine } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button, Card, PageTransition, PredictiveInput, Footer } from '../components';
 import { askStoreAssistant, type BotMessage } from '../lib/bot';
 import { useBiometricStore } from '../store/biometricStore';
+import { useAuthStore } from '../store/authStore';
 
 const starterPrompts = [
   '¿Qué colores me quedan mejor?',
@@ -13,7 +15,9 @@ const starterPrompts = [
 ];
 
 export const StoreAssistant: React.FC = () => {
-  const { currentScan } = useBiometricStore();
+  const { user } = useAuthStore();
+  const { currentScan, fetchScanHistory, loading: scanLoading } = useBiometricStore();
+
   const [messages, setMessages] = useState<BotMessage[]>([
     {
       role: 'assistant',
@@ -22,6 +26,13 @@ export const StoreAssistant: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Cargar el escaneo del usuario autenticado al montar el componente
+  useEffect(() => {
+    if (user?.id) {
+      fetchScanHistory(user.id);
+    }
+  }, [user?.id, fetchScanHistory]);
 
   const predictivePrompts = [
     ...starterPrompts,
@@ -87,19 +98,42 @@ export const StoreAssistant: React.FC = () => {
               ))}
             </div>
 
-            {currentScan ? (
+            {/* Panel de estado del escaneo */}
+            {scanLoading ? (
+              <div className="rounded-2xl border border-ink/10 bg-white/80 p-4 text-sm text-ink/50 animate-pulse">
+                Cargando tu perfil biométrico...
+              </div>
+            ) : currentScan ? (
               <div className="rounded-2xl border border-ember/20 bg-ember/5 p-4 text-sm text-ink/70 flex items-start gap-3">
-                <div className="p-2 bg-white rounded-lg text-ember shadow-sm">
+                <div className="p-2 bg-white rounded-lg text-ember shadow-sm shrink-0">
                   <Bot size={18} />
                 </div>
                 <div>
-                  <p className="font-bold text-ink mb-1">Perfil activo detectado</p>
-                  <p>Tengo tus datos de cuerpo **{currentScan.body_shape}** y tono **{currentScan.skin_tone}**. Mis consejos serán personalizados.</p>
+                  <p className="font-bold text-ink mb-1">Perfil activo ✓</p>
+                  <p>
+                    Figura <span className="font-medium text-ink">{currentScan.body_shape?.replace('_', ' ')}</span> · Tono{' '}
+                    <span className="font-medium text-ink">{currentScan.skin_tone}</span>.
+                    Mis consejos serán totalmente personalizados para ti.
+                  </p>
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-ink/10 bg-white/80 p-4 text-sm text-ink/70">
-                Tip: Haz un escaneo en el **Scan Studio** para que pueda darte recomendaciones precisas para tu figura.
+              <div className="rounded-2xl border border-ink/10 bg-white/80 p-4 text-sm text-ink/70 space-y-3">
+                <div className="flex items-center gap-2 text-ember font-semibold">
+                  <ScanLine size={16} />
+                  Sin escaneo registrado
+                </div>
+                <p>
+                  Aún no tienes un perfil biométrico. Haz un escaneo en el{' '}
+                  <strong>Scan Studio</strong> para recibir recomendaciones 100% personalizadas
+                  para tu figura y colorimetría.
+                </p>
+                <Link
+                  to="/scan-studio"
+                  className="inline-block px-4 py-2 rounded-xl bg-ember text-white text-xs font-semibold hover:bg-ember/90 transition-colors"
+                >
+                  Ir a Scan Studio →
+                </Link>
               </div>
             )}
           </Card>
@@ -113,7 +147,9 @@ export const StoreAssistant: React.FC = () => {
                 <p className="font-semibold text-ink">Style Assistant</p>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                  <p className="text-xs text-ink/50">En línea y listo para asesorarte</p>
+                  <p className="text-xs text-ink/50">
+                    {currentScan ? 'Perfil cargado · Consejos personalizados' : 'En línea · Consejos generales'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -124,11 +160,10 @@ export const StoreAssistant: React.FC = () => {
                   key={`${message.role}-${index}`}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                    message.role === 'user'
+                  className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${message.role === 'user'
                       ? 'ml-auto bg-ink text-sand-50 shadow-lg'
                       : 'bg-white border border-ink/10 text-ink/80 shadow-sm'
-                  }`}
+                    }`}
                 >
                   {message.role === 'assistant' && (
                     <div className="flex items-center gap-2 text-xs text-ink/40 mb-1 font-bold">
