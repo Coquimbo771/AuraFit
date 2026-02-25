@@ -15,7 +15,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Inicio', icon: <Home size={20} />, href: '/' },
-  { label: 'Escaneo I.', icon: <Wand2 size={20} />, href: '/scan', requiresAuth: true },
+  { label: 'Escaneo I.A.', icon: <Wand2 size={20} />, href: '/scan', requiresAuth: true },
   { label: 'Marketplace', icon: <ShoppingBag size={20} />, href: '/marketplace' },
   { label: 'Guia de estilo', icon: <BookOpen size={20} />, href: '/style-guide' },
   { label: 'Asistente', icon: <Bot size={20} />, href: '/assistant' },
@@ -89,8 +89,8 @@ export const Navigation: React.FC = () => {
                 key={item.href}
                 to={item.href}
                 className={`px-2.5 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-300 whitespace-nowrap ${isActive(item.href)
-                    ? 'bg-ink text-sand-50 dark:bg-gradient-to-r dark:from-neon-blue dark:to-neon-purple dark:text-dark-950 dark:shadow-[0_0_20px_rgba(0,240,255,0.5)] scale-105'
-                    : 'text-ink/70 hover:text-ink hover:bg-ink/5 dark:text-sand-50/70 dark:hover:text-sand-50 dark:hover:bg-neon-blue/10 dark:hover:shadow-[0_0_15px_rgba(0,240,255,0.2)]'
+                  ? 'bg-ink text-sand-50 dark:bg-gradient-to-r dark:from-neon-blue dark:to-neon-purple dark:text-dark-950 dark:shadow-[0_0_20px_rgba(0,240,255,0.5)] scale-105'
+                  : 'text-ink/70 hover:text-ink hover:bg-ink/5 dark:text-sand-50/70 dark:hover:text-sand-50 dark:hover:bg-neon-blue/10 dark:hover:shadow-[0_0_15px_rgba(0,240,255,0.2)]'
                   }`}
               >
                 {item.label}
@@ -240,8 +240,8 @@ export const Navigation: React.FC = () => {
                     key={item.href}
                     to={item.href}
                     className={`flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base transition-colors ${isActive(item.href)
-                        ? 'bg-ink text-sand-50 dark:bg-sand-50 dark:text-ink'
-                        : 'bg-white dark:bg-ink-800 text-ink/80 dark:text-sand-50/80 border border-ink/10 dark:border-sand-50/10'
+                      ? 'bg-ink text-sand-50 dark:bg-sand-50 dark:text-ink'
+                      : 'bg-white dark:bg-ink-800 text-ink/80 dark:text-sand-50/80 border border-ink/10 dark:border-sand-50/10'
                       }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
