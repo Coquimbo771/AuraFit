@@ -1,9 +1,5 @@
 import type { Product } from '../types';
 
-/**
- * Smart Recommendation Engine
- * Uses collaborative filtering and content-based algorithms
- */
 
 // Calculate similarity between two products
 export const calculateProductSimilarity = (product1: Product, product2: Product): number => {
