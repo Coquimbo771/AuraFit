@@ -1,11 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Save, Sparkles, Upload } from 'lucide-react';
+import { Camera, Save, Sparkles, Upload, ShoppingBag } from 'lucide-react';
 import Webcam from 'react-webcam';
-import { Button, PageTransition, LoadingSpinner, Card, Footer } from '../components';
+import { Button, PageTransition, LoadingSpinner, Card, Footer, ProductCard } from '../components';
 import { useBiometricStore } from '../store/biometricStore';
 import { useAuthStore } from '../store/authStore';
+import { useShoppingStore } from '../store/shoppingStore';
+import { supabase } from '../lib/supabase';
 import { analyzeImage, validateImageQuality } from '../lib/imageAnalysis';
+import type { Product } from '../types';
 
 type ScanPhase = 'idle' | 'camera' | 'processing' | 'results';
 
@@ -17,7 +21,54 @@ export const ScanStudio: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { saveBiometric, loading: biometricLoading } = useBiometricStore();
   const { user } = useAuthStore();
+  const { savedItems, addToWardrobe, removeFromWardrobe } = useShoppingStore();
   const [currentScan, setCurrentScan] = useState<any>(null);
+  const navigate = useNavigate();
+  const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  useEffect(() => {
+    const fetchRandomProducts = async () => {
+      if (phase !== 'results') return;
+      try {
+        const { data, error } = await supabase.from('products').select('*').limit(20);
+        if (error) throw error;
+        if (data && data.length > 0) {
+          // Get 3 random
+          const shuffled = [...data].sort(() => 0.5 - Math.random());
+          setRecommendedProducts(shuffled.slice(0, 3));
+        }
+      } catch (err) {
+        console.error('Error fetching recommended products:', err);
+      }
+    };
+    fetchRandomProducts();
+  }, [phase]);
+
+  const handleProductClick = async (productId: string) => {
+    // Save scan if user is logged in
+    if (user && currentScan && !savingProfile) {
+      setSavingProfile(true);
+      try {
+        await saveBiometric(user.id, {
+          body_shape: currentScan.bodyShape,
+          skin_tone: currentScan.skinTone,
+          color_palette: currentScan.colorPalette.map((c: any) => c.hex),
+          measurements: {
+            shoulder: 40 + Math.random() * 10,
+            waist: 28 + Math.random() * 12,
+            hip: 36 + Math.random() * 12,
+          },
+        } as any);
+      } catch (error) {
+        console.error('Error saving profile automatically:', error);
+      } finally {
+        setSavingProfile(false);
+      }
+    }
+
+    navigate('/marketplace');
+  };
 
   const handleCameraRequest = () => {
     // Directly go to camera phase - browser will request permissions automatically
@@ -439,6 +490,42 @@ export const ScanStudio: React.FC = () => {
                       ))}
                     </ul>
                   </motion.div>
+
+                  {/* Mercado de Piezas Recomendadas */}
+                  {recommendedProducts.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="border-t border-ink/10 pt-6 mt-6"
+                    >
+                      <h3 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
+                        <ShoppingBag size={18} className="text-ember" />
+                        Descubre tu estilo en el Marketplace
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {recommendedProducts.map((product) => (
+                          <div key={product.id} className="h-full">
+                            <ProductCard
+                              product={product}
+                              matchScore={85 + Math.floor(Math.random() * 15)}
+                              isSaved={savedItems.includes(product.id)}
+                              onAddToWardrobe={() => {
+                                if (user) addToWardrobe(user.id, product.id);
+                              }}
+                              onRemoveFromWardrobe={() => {
+                                if (user) removeFromWardrobe(user.id, product.id);
+                              }}
+                              onQuickView={() => handleProductClick(product.id)}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-ink/50 text-center mt-4">
+                        * Al presionar un producto se guardará automáticamente tu perfil.
+                      </p>
+                    </motion.div>
+                  )}
                 </Card>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
