@@ -72,14 +72,16 @@ export const StoreAssistant: React.FC = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-gradient-to-b from-sand-50 via-sand to-white pt-24 pb-12 px-4">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-8">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-center text-4xl md:text-5xl font-bold text-ink mb-8">Asistente de Estilo</h1>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-8">
           <Card variant="solid" className="p-7 space-y-6 h-fit">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-ink/50 flex items-center gap-2">
                 <Sparkles size={14} className="text-ember" />
                 AuraFit AI
               </p>
-              <h1 className="text-4xl font-bold text-ink">Asistente de Estilo</h1>
               <p className="text-ink/70 mt-2">
                 Tu experto personal en moda, colorimetría y ajuste. Pregúntame lo que sea sobre tu próximo outfit.
               </p>
@@ -206,6 +208,7 @@ export const StoreAssistant: React.FC = () => {
               </Button>
             </div>
           </Card>
+          </div>
         </div>
       </div>
       <Footer />
