@@ -1,6 +1,3 @@
-/**
- * Geolocation and Context Awareness System
- */
 
 export interface UserLocation {
   latitude: number;
@@ -86,9 +83,9 @@ const calculateDistance = (
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
@@ -196,10 +193,10 @@ export const getLocalizedContent = (location: UserLocation) => {
 export const getDeviceContext = () => {
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const isTablet = /iPad|Android/i.test(navigator.userAgent) && !/Mobile/i.test(navigator.userAgent);
-  
+
   // @ts-ignore - connection API not in all browsers
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  
+
   const connectionType = connection?.effectiveType || 'unknown';
   const isSlowConnection = ['slow-2g', '2g'].includes(connectionType);
 
