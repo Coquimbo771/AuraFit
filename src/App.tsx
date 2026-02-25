@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import { Navigation } from './components/Navigation';
@@ -10,6 +10,9 @@ import { ScanStudio } from './pages/ScanStudio';
 import { Marketplace } from './pages/Marketplace';
 import { StyleGuide } from './pages/StyleGuide';
 import { Dashboard } from './pages/Dashboard';
+import { StoreAssistant } from './pages/StoreAssistant';
+import { Checkout } from './pages/Checkout';
+import { AdminPanel } from './pages/AdminPanel';
 
 function App() {
   const { getCurrentUser } = useAuthStore();
@@ -34,12 +37,29 @@ function App() {
           }
         />
         <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/assistant" element={<StoreAssistant />} />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/style-guide" element={<StyleGuide />} />
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminPanel />
             </ProtectedRoute>
           }
         />

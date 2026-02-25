@@ -2,12 +2,16 @@ export type BodyShape = 'hourglass' | 'rectangle' | 'pear' | 'triangle' | 'inver
 export type SkinTone = 'cool' | 'warm' | 'neutral';
 export type BlogCategory = 'color-theory' | 'body-types' | 'sustainability' | 'science';
 export type ProductCategory = 'office' | 'gym' | 'party' | 'casual';
+export type UserRole = 'client' | 'admin' | 'stylist';
 
 export interface User {
   id: string;
   email: string;
   full_name: string | null;
   avatar_url: string | null;
+  role?: UserRole;
+  phone?: string | null;
+  preferences?: Record<string, any> | null;
   created_at: string;
   updated_at: string;
 }
@@ -39,6 +43,45 @@ export interface Product {
   sustainable_rating: number;
   sizes_available: string[];
   color_palette: string[] | null;
+  created_at: string;
+}
+
+export interface CartItem {
+  productId: string;
+  quantity: number;
+}
+
+export interface ShippingAddress {
+  fullName: string;
+  phone: string;
+  country: string;
+  city: string;
+  addressLine1: string;
+  addressLine2?: string;
+  postalCode: string;
+}
+
+export interface CheckoutState {
+  couponCode: string;
+  notes: string;
+  shippingAddress: ShippingAddress | null;
+}
+
+export interface OrderItem {
+  product_id: string;
+  quantity: number;
+  unit_price: number;
+}
+
+export interface Order {
+  id: string;
+  user_id: string;
+  total_amount: number;
+  currency: string;
+  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+  payment_provider: string | null;
+  shipping_address: ShippingAddress | null;
+  notes: string | null;
   created_at: string;
 }
 
@@ -101,5 +144,7 @@ export interface ShoppingState {
     priceRange: [number, number];
   };
   savedItems: string[];
-  cart: Array<{ productId: string; quantity: number }>;
+  cart: CartItem[];
+  checkout: CheckoutState;
+  orders: Order[];
 }

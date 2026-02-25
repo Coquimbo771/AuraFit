@@ -1,21 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Sliders } from 'lucide-react';
-import { ProductCard, PageTransition, Skeleton, Button, Card } from '../components';
+import { Sliders, Search, ArrowUpDown } from 'lucide-react';
+import { ProductCard, PageTransition, Skeleton, Button, Badge, PredictiveInput, Footer, Card  } from '../components';
 import { useShoppingStore } from '../store/shoppingStore';
 import { useAuthStore } from '../store/authStore';
+import { useBehaviorStore } from '../store/behaviorStore';
 import { useBiometricStore } from '../store/biometricStore';
 import { supabase } from '../lib/supabase';
+import { semanticSearch } from '../lib/recommendations';
+import { useDebounce } from '../hooks/useDebounce';
 import type { Product, ProductCategory } from '../types';
 
 export const Marketplace: React.FC = () => {
   const { user } = useAuthStore();
-  const { filters, savedItems, setOccasionFilter, setSustainabilityFilter, setPriceRange, addToWardrobe, removeFromWardrobe, fetchSavedItems } = useShoppingStore();
+  const { trackSearch } = useBehaviorStore();
   const { currentScan } = useBiometricStore();
+  const {
+    filters,
+    savedItems,
+    setOccasionFilter,
+    setSustainabilityFilter,
+    setPriceRange,
+    addToWardrobe,
+    removeFromWardrobe,
+    fetchSavedItems,
+    addToCart,
+  } = useShoppingStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [query, setQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'match' | 'price-asc' | 'price-desc' | 'sustainable'>('match');
+  
+  // Debounce search query for better performance
+  const debouncedQuery = useDebounce(query, 400);
 
   const occasions: ProductCategory[] = ['office', 'gym', 'party', 'casual'];
 
@@ -61,126 +80,191 @@ export const Marketplace: React.FC = () => {
     }
   }, [user, fetchSavedItems]);
 
+  // Memoize filtered and sorted products
   useEffect(() => {
     let filtered = [...products];
 
-    if (filters.occasion.length > 0) {
-      filtered = filtered.filter((p) => filters.occasion.includes(p.category as ProductCategory));
+    // Smart semantic search (if query present)
+    if (debouncedQuery.trim()) {
+      filtered = semanticSearch(debouncedQuery, products);
+      trackSearch(debouncedQuery); // Track search for ML
+    } else {
+      // Regular filters
+      if (filters.occasion.length > 0) {
+        filtered = filtered.filter((p) => filters.occasion.includes(p.category as ProductCategory));
+      }
     }
 
+    // Apply sustainability and price filters
     filtered = filtered.filter((p) => p.sustainable_rating >= filters.sustainabilityMin);
     filtered = filtered.filter((p) => p.price >= filters.priceRange[0] && p.price <= filters.priceRange[1]);
 
-    setFilteredProducts(filtered);
-  }, [products, filters]);
+    // Sort results
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortBy === 'price-asc') return a.price - b.price;
+      if (sortBy === 'price-desc') return b.price - a.price;
+      if (sortBy === 'sustainable') return b.sustainable_rating - a.sustainable_rating;
+      return b.sustainable_rating - a.sustainable_rating;
+    });
 
-  const handleOccasionChange = (occasion: ProductCategory) => {
+    setFilteredProducts(sorted);
+  }, [products, filters, debouncedQuery, sortBy, trackSearch]);
+
+  const activeFilterLabels = useMemo(() => {
+    const labels: string[] = [];
+    if (filters.occasion.length > 0) labels.push(`Ocasiones: ${filters.occasion.join(', ')}`);
+    if (filters.sustainabilityMin > 1) labels.push(`Sostenibilidad ${filters.sustainabilityMin}★+`);
+    if (filters.priceRange[1] < 1000) labels.push(`Hasta $${filters.priceRange[1]}`);
+    if (debouncedQuery.trim()) labels.push(`Búsqueda: ${debouncedQuery.trim()}`);
+    return labels;
+  }, [filters, debouncedQuery]);
+
+  const predictiveSuggestions = useMemo(() => {
+    const keywordPool = new Set<string>([
+      'oficina elegante',
+      'gym outfit',
+      'party look',
+      'casual minimal',
+      'sostenible',
+      'tallas inclusivas',
+      'colores calidos',
+      'colores frios',
+    ]);
+
+    products.forEach((product) => {
+      keywordPool.add(product.name);
+      if (product.category) keywordPool.add(product.category);
+      if (product.occasion) keywordPool.add(product.occasion);
+      if (product.description) {
+        product.description
+          .split(/\s+/)
+          .filter((word) => word.length > 4)
+          .slice(0, 4)
+          .forEach((word) => keywordPool.add(word.toLowerCase()));
+      }
+    });
+
+    return Array.from(keywordPool).map((item, index) => ({
+      id: `${index}-${item}`,
+      label: item,
+      hint: 'Sugerencia inteligente',
+    }));
+  }, [products]);
+
+  const handleOccasionChange = useCallback((occasion: ProductCategory) => {
     const newOccasions = filters.occasion.includes(occasion)
       ? filters.occasion.filter((o) => o !== occasion)
       : [...filters.occasion, occasion];
     setOccasionFilter(newOccasions);
-  };
+  }, [filters.occasion, setOccasionFilter]);
 
-  const handleAddToWardrobe = async (productId: string) => {
+  const handleAddToWardrobe = useCallback(async (productId: string) => {
     if (!user) return;
     try {
       await addToWardrobe(user.id, productId);
     } catch (error) {
       console.error('Error adding to wardrobe:', error);
     }
-  };
+  }, [user, addToWardrobe]);
 
-  const handleRemoveFromWardrobe = async (productId: string) => {
+  const handleRemoveFromWardrobe = useCallback(async (productId: string) => {
     if (!user) return;
     try {
       await removeFromWardrobe(user.id, productId);
     } catch (error) {
       console.error('Error removing from wardrobe:', error);
     }
-  };
+  }, [user, removeFromWardrobe]);
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-[#F9FAFB] py-16 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-sand-50 via-sand to-white dark:from-dark-950 dark:via-dark-900 dark:to-dark-850 pt-16 sm:pt-20 md:pt-24 pb-8 sm:pb-12 px-3 sm:px-4 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-200 pb-12"
+            className="mb-6 sm:mb-8 md:mb-10"
           >
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                 <div className="w-10 h-[1px] bg-neon-blue" />
-                 <span className="text-[10px] font-black text-neon-blue uppercase tracking-[0.3em]">Smart Catalog</span>
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 sm:gap-6">
+              <div>
+                <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-ink/50 dark:text-sand-50/50">Marketplace</p>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-ink dark:text-sand-50 mb-2 sm:mb-3">Encuentra tu match perfecto</h1>
+                <p className="text-ink/70 dark:text-sand-50/70 text-sm sm:text-base lg:text-lg leading-relaxed">
+                  Piezas curadas por fit, colorimetria y sostenibilidad. Compra con menos devoluciones.
+                </p>
               </div>
-              <h1 className="text-6xl font-black text-sage uppercase italic tracking-tighter mb-4 leading-none">
-                Curated<br />Marketplace
-              </h1>
-              <p className="text-gray-500 font-medium max-w-lg italic">
-                Our Style AI has curated these selections based on your <span className="text-sage font-bold underline decoration-neon-blue underline-offset-4">{currentScan?.body_shape || 'uniquely'}</span> profile.
-              </p>
-            </div>
-            
-            <div className="flex gap-4">
-               <div className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm text-center">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Items Found</p>
-                  <p className="text-2xl font-black text-sage italic tracking-tighter">{filteredProducts.length}</p>
-               </div>
-               <div className="p-4 bg-sage border border-sage rounded-2xl shadow-sm text-center text-white">
-                  <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-1">Avg Fit</p>
-                  <p className="text-2xl font-black italic tracking-tighter">94%</p>
-               </div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                <div className="relative flex-1 sm:flex-initial">
+                  <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-ink/40 dark:text-sand-50/40" size={16} />
+                  <PredictiveInput
+                    value={query}
+                    onChange={setQuery}
+                    onSubmit={() => undefined}
+                    suggestions={predictiveSuggestions}
+                    placeholder="Buscar por nombre, color o ocasion"
+                    className="w-full sm:w-64 lg:w-72"
+                    inputClassName="w-full pl-9 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl border border-ink/10 dark:border-neon-blue/20 bg-white/80 dark:bg-dark-700/80 text-sm sm:text-base text-ink dark:text-sand-50 focus:outline-none focus:border-ember dark:focus:border-neon-blue"
+                  />
+                </div>
+                <div className="flex items-center gap-2 border border-ink/10 dark:border-neon-blue/20 rounded-xl sm:rounded-2xl px-2 sm:px-3 py-2 bg-white/80 dark:bg-dark-700/80">
+                  <ArrowUpDown size={14} className="text-ink/50 dark:text-sand-50/50 sm:w-4 sm:h-4" />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                    className="bg-transparent text-xs sm:text-sm font-semibold text-ink/70 dark:text-sand-50/70 focus:outline-none"
+                  >
+                    <option value="match">Mejor match</option>
+                    <option value="price-asc">Precio menor</option>
+                    <option value="price-desc">Precio mayor</option>
+                    <option value="sustainable">Mas sostenible</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            {/* FILTER SIDEBAR */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className={`lg:col-span-3 ${showFilters ? 'block' : 'hidden'} lg:block sticky top-8 h-fit`}
+              className={`lg:block ${showFilters ? 'block' : 'hidden'} lg:sticky lg:top-20 h-fit`}
             >
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_20px_40px_rgba(0,0,0,0.03)]">
-                <h3 className="text-xs font-black text-sage mb-8 uppercase tracking-[0.2em] flex items-center justify-between">
-                  Filter Parameters
-                  <Sliders size={14} className="text-neon-blue" />
+              <div className="bg-white dark:bg-dark-800/50 rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 shadow-[0_24px_60px_-40px_rgba(31,26,23,0.5)] dark:shadow-[0_24px_60px_-20px_rgba(0,240,255,0.2)] border border-ink/5 dark:border-neon-blue/20 backdrop-blur-xl">
+                <h3 className="text-base sm:text-lg font-bold text-ink dark:text-sand-50 mb-4 sm:mb-6 flex items-center gap-2">
+                  <Sliders size={18} className="sm:w-[20px] sm:h-[20px]" />
+                  Filtros
                 </h3>
 
-                <div className="space-y-10">
+                <div className="space-y-4 sm:space-y-6">
                   <div>
-                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 italic">By Occasion</h4>
-                    <div className="space-y-3">
+                    <h4 className="font-semibold text-ink dark:text-sand-50 mb-2 sm:mb-3 text-sm sm:text-base">Ocasion</h4>
+                    <div className="space-y-1.5 sm:space-y-2">
                       {occasions.map((occasion) => (
-                        <label key={occasion} className="flex items-center gap-3 cursor-pointer group">
-                          <div className="relative flex items-center justify-center">
-                            <input
-                              type="checkbox"
-                              checked={filters.occasion.includes(occasion)}
-                              onChange={() => handleOccasionChange(occasion)}
-                              className="peer appearance-none w-5 h-5 border-2 border-gray-200 rounded-lg checked:bg-sage checked:border-sage transition-all"
-                            />
-                            <div className="absolute opacity-0 peer-checked:opacity-100 pointer-events-none text-white font-bold text-[10px]">✓</div>
-                          </div>
-                          <span className="text-sm font-bold text-sage/60 uppercase tracking-tight group-hover:text-sage transition-colors peer-checked:text-sage italic">
-                            {occasion}
-                          </span>
+                        <label key={occasion} className="flex items-center gap-2 cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={filters.occasion.includes(occasion)}
+                            onChange={() => handleOccasionChange(occasion)}
+                            className="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-ember dark:accent-neon-blue rounded"
+                          />
+                          <span className="text-ink/70 dark:text-sand-50/70 capitalize text-xs sm:text-sm group-hover:text-ink dark:group-hover:text-sand-50 transition-colors">{occasion}</span>
                         </label>
                       ))}
                     </div>
                   </div>
 
-                  <div>
-                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 italic">Sustainability Level</h4>
-                    <div className="flex gap-2">
+                  <div className="border-t border-ink/10 dark:border-sand-50/10 pt-3 sm:pt-4">
+                    <h4 className="font-semibold text-ink dark:text-sand-50 mb-2 sm:mb-3 text-sm sm:text-base">Sostenibilidad</h4>
+                    <div className="flex gap-1 sm:gap-1.5">
                       {[1, 2, 3, 4, 5].map((rating) => (
                         <button
                           key={rating}
                           onClick={() => setSustainabilityFilter(rating)}
-                          className={`flex-1 aspect-square rounded-xl text-xs font-black transition-all ${
+                          className={
                             filters.sustainabilityMin === rating
-                              ? 'bg-sage text-white shadow-lg shadow-sage/20 scale-110'
-                              : 'bg-gray-50 text-sage/40 hover:bg-gray-100 border border-gray-100'
-                          }`}
+                              ? 'flex-1 py-1.5 sm:py-2 rounded text-sm sm:text-base transition-colors bg-ember dark:bg-neon-blue text-ink dark:text-dark-950'
+                              : 'flex-1 py-1.5 sm:py-2 rounded text-sm sm:text-base transition-colors bg-ink/5 dark:bg-dark-700 text-ink/70 dark:text-sand-50/70 hover:bg-ink/10 dark:hover:bg-dark-600'
+                          }
                         >
                           {rating}
                         </button>
@@ -188,9 +272,9 @@ export const Marketplace: React.FC = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 italic">Price Ceiling</h4>
-                    <div className="space-y-4">
+                  <div className="border-t border-ink/10 dark:border-sand-50/10 pt-3 sm:pt-4">
+                    <h4 className="font-semibold text-ink dark:text-sand-50 mb-2 sm:mb-3 text-sm sm:text-base">Rango de precio</h4>
+                    <div className="space-y-2 sm:space-y-3">
                       <input
                         type="range"
                         min="0"
@@ -198,43 +282,58 @@ export const Marketplace: React.FC = () => {
                         step="50"
                         value={filters.priceRange[1]}
                         onChange={(e) => setPriceRange(0, parseInt(e.target.value))}
-                        className="w-full h-1 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-neon-blue"
+                        className="w-full accent-ember dark:accent-neon-blue"
                       />
-                      <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase">Max Limit</span>
-                        <span className="text-sm font-black text-sage italic">${filters.priceRange[1]}</span>
-                      </div>
+                      <p className="text-xs sm:text-sm text-ink/60 dark:text-sand-50/60">
+                        ${filters.priceRange[0]} - ${filters.priceRange[1]}
+                      </p>
                     </div>
                   </div>
-                </div>
-
-                <div className="mt-12 pt-8 border-t border-gray-100">
-                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full text-[10px] font-black tracking-widest uppercase hover:bg-gray-50"
-                    onClick={() => {
-                      setOccasionFilter([]);
-                      setSustainabilityFilter(1);
-                      setPriceRange(0, 1000);
-                    }}
-                  >
-                    Reset All
-                  </Button>
                 </div>
               </div>
             </motion.div>
 
             {/* PRODUCT GRID */}
-            <div className="lg:col-span-9">
+            <div className="lg:col-span-3">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+                {['oficina elegante', 'party look', 'sostenible', 'tallas inclusivas'].map((smartTag) => (
+                  <button
+                    key={smartTag}
+                    onClick={() => setQuery(smartTag)}
+                    className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-full border border-ink/15 dark:border-neon-blue/20 bg-white/70 dark:bg-dark-700/70 text-ink/70 dark:text-sand-50/70 hover:text-ink dark:hover:text-sand-50 hover:bg-white dark:hover:bg-dark-700 transition-colors"
+                  >
+                    {smartTag}
+                  </button>
+                ))}
+              </div>
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setShowFilters(!showFilters)}
-                className="lg:hidden mb-8 w-full py-4 bg-white border border-gray-200 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest shadow-sm"
+                className="lg:hidden mb-4 sm:mb-6 flex items-center gap-2 px-4 py-2.5 bg-ember dark:bg-neon-blue text-ink dark:text-dark-950 rounded-full font-semibold text-sm shadow-lg transition-all"
               >
                 <Sliders size={16} />
-                Filters & Parameters
+                Filtros
               </motion.button>
+
+              {activeFilterLabels.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
+                  {activeFilterLabels.map((label) => (
+                    <Badge key={label} label={label} variant="primary" />
+                  ))}
+                  <button
+                    onClick={() => {
+                      setOccasionFilter([]);
+                      setSustainabilityFilter(1);
+                      setPriceRange(0, 1000);
+                      setQuery('');
+                    }}
+                    className="text-xs sm:text-sm font-semibold text-ink/60 dark:text-sand-50/60 hover:text-ink dark:hover:text-sand-50 transition-colors"
+                  >
+                    Limpiar todo
+                  </button>
+                </div>
+              )}
 
               {loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -273,27 +372,51 @@ export const Marketplace: React.FC = () => {
                       },
                     },
                   }}
-                  className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6"
                 >
                   {filteredProducts.map((product) => (
-                    <ProductCard
+                    <motion.div
                       key={product.id}
-                      product={product}
-                      matchScore={calculateMatchScore(product, currentScan)}
-                      isSaved={savedItems.includes(product.id)}
-                      onAddToWardrobe={() => handleAddToWardrobe(product.id)}
-                      onRemoveFromWardrobe={() => handleRemoveFromWardrobe(product.id)}
-                      onQuickView={() => {
-                        // Modal logic could go here
-                      }}
-                    />
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex flex-col h-full"
+                    >
+                      <ProductCard
+                        product={product}
+                        matchScore={calculateMatchScore(product, currentScan)}
+                        isSaved={savedItems.includes(product.id)}
+                        onAddToWardrobe={() => handleAddToWardrobe(product.id)}
+                        onRemoveFromWardrobe={() => handleRemoveFromWardrobe(product.id)}
+                        onQuickView={() => {
+                          // Modal logic could go here
+                        }}
+                      />
+                      <Button
+                        variant="primary"
+                        size="md"
+                        className="w-full mt-3"
+                        onClick={() => addToCart(product.id, 1)}
+                      >
+                        Agregar al carrito
+                      </Button>
+                    </motion.div>
                   ))}
                 </motion.div>
               )}
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-center text-ink/60 mt-12"
+              >
+                Mostrando {filteredProducts.length} de {products.length} productos
+              </motion.p>
             </div>
           </div>
         </div>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

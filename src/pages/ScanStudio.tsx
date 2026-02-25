@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, AlertCircle, Download, Save } from 'lucide-react';
+import { Camera, Save, Sparkles, Upload } from 'lucide-react';
 import Webcam from 'react-webcam';
-import { Button, PageTransition, LoadingSpinner, Card } from '../components';
+import { Button, PageTransition, LoadingSpinner, Card, Footer } from '../components';
 import { useBiometricStore } from '../store/biometricStore';
 import { useAuthStore } from '../store/authStore';
+import { analyzeImage, validateImageQuality } from '../lib/imageAnalysis';
 
 type ScanPhase = 'idle' | 'camera' | 'processing' | 'results';
 
@@ -102,56 +103,100 @@ export const ScanStudio: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const webcamRef = useRef<Webcam>(null);
-  const { generateRandomScan, saveBiometric, loading: biometricLoading } = useBiometricStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { saveBiometric, loading: biometricLoading } = useBiometricStore();
   const { user } = useAuthStore();
   const [currentScan, setCurrentScan] = useState<any>(null);
 
-  useEffect(() => {
-    if (phase === 'processing') {
-      const stepInterval = setInterval(() => {
-        setCurrentStep((prev) => (prev < ANALYSIS_STEPS.length - 1 ? prev + 1 : prev));
-      }, 500);
-      return () => clearInterval(stepInterval);
-    }
-  }, [phase]);
+  const handleCameraRequest = () => {
+    // Directly go to camera phase - browser will request permissions automatically
+    setPhase('camera');
+    setCameraPermission(true);
+  };
 
-  const handleCameraRequest = async () => {
-    try {
-      const permission = await navigator.permissions.query({ name: 'camera' as any });
-      setCameraPermission(permission.state === 'granted');
-      if (permission.state === 'granted') {
-        setPhase('camera');
-      } else {
-        // Just trigger the browser dialog
-        setPhase('camera');
+  const handleFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check if it's an image
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecciona una imagen válida');
+      return;
+    }
+
+    // Read file as data URL
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const imageSrc = event.target?.result as string;
+      if (imageSrc) {
+        await processImage(imageSrc);
       }
-    } catch {
-      setPhase('camera');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const processImage = async (imageSrc: string) => {
+    setPhase('processing');
+    setProgress(0);
+
+    try {
+      // Validate image quality
+      setProgress(10);
+      const validation = await validateImageQuality(imageSrc);
+      if (!validation.valid) {
+        alert(`Calidad de imagen insuficiente: ${validation.reason}`);
+        setPhase('idle');
+        return;
+      }
+      
+      setProgress(30);
+      
+      // Analyze image with AI
+      const analysisResult = await analyzeImage(imageSrc);
+      
+      setProgress(70);
+      
+      // Simulate processing time for better UX
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      setProgress(100);
+      
+      // Convert analysis result to scan format
+      const scan = {
+        id: `scan-${Date.now()}`,
+        bodyShape: analysisResult.bodyShape,
+        skinTone: analysisResult.skinTone,
+        suggestedSize: analysisResult.suggestedSize,
+        colorPalette: analysisResult.colorPalette,
+        styleRecommendations: analysisResult.styleRecommendations,
+        confidence: analysisResult.confidence,
+        dominantColors: analysisResult.dominantColors,
+        skinToneRGB: analysisResult.skinToneRGB,
+      };
+      
+      setCurrentScan(scan);
+      setPhase('results');
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      alert('Error en el análisis. Intenta con mejor iluminación o una imagen más clara.');
+      setPhase('idle');
     }
   };
 
   const handleCapture = async () => {
-    setPhase('processing');
-    setProgress(0);
-    setCurrentStep(0);
-
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 95) {
-          clearInterval(interval);
-          return 95;
-        }
-        return prev + Math.random() * 15;
-      });
-    }, 400);
-
-    await new Promise((resolve) => setTimeout(resolve, 4000));
-    clearInterval(interval);
-    setProgress(100);
-
-    const scan = generateRandomScan();
-    setCurrentScan(scan);
-    setPhase('results');
+    if (!webcamRef.current) return;
+    
+    // Capture image from webcam
+    const imageSrc = webcamRef.current.getScreenshot();
+    if (!imageSrc) {
+      alert('Error al capturar imagen. Intenta de nuevo.');
+      return;
+    }
+    
+    await processImage(imageSrc);
   };
 
   const handleSaveResults = async () => {
@@ -168,10 +213,11 @@ export const ScanStudio: React.FC = () => {
           hip: 36 + Math.random() * 12,
         },
       } as any);
-      alert('Results saved to your profile!');
+      alert('¡Resultados guardados en tu perfil!');
       setPhase('idle');
     } catch (error) {
       console.error('Error saving results:', error);
+      alert('Error al guardar. Intenta de nuevo.');
     }
   };
 
@@ -182,32 +228,36 @@ export const ScanStudio: React.FC = () => {
   };
 
   const bodyShapeLabels: Record<string, string> = {
-    hourglass: 'Hourglass',
-    rectangle: 'Rectangle',
-    pear: 'Pear',
-    triangle: 'Triangle',
-    inverted_triangle: 'Inverted Triangle',
-    athletic: 'Athletic',
+    hourglass: 'Reloj de arena',
+    rectangle: 'Rectángulo',
+    pear: 'Pera',
+    triangle: 'Triángulo',
+    inverted_triangle: 'Triángulo invertido',
+    athletic: 'Atlético',
   };
 
   const skinToneLabels: Record<string, string> = {
-    cool: 'Cool Undertone',
-    warm: 'Warm Undertone',
-    neutral: 'Neutral Undertone',
+    cool: 'Subtono frío',
+    warm: 'Subtono cálido',
+    neutral: 'Subtono neutro',
   };
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gradient-to-b from-sage-50 to-sand py-12 px-4">
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-b from-sand-50 via-sand to-white pt-24 pb-12 px-4">
+        <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12"
           >
-            <h1 className="text-4xl font-bold text-sage mb-4">Scan Studio</h1>
-            <p className="text-gray-600 text-lg">
-              Let our AI analyze your body shape and skin tone to create your perfect style profile
+            <p className="text-xs uppercase tracking-[0.3em] text-ink/50 flex items-center justify-center gap-2">
+              <Sparkles size={14} className="text-ember" />
+              Scan Studio con IA
+            </p>
+            <h1 className="text-4xl md:text-5xl font-bold text-ink mb-4">Escaneo Inteligente</h1>
+            <p className="text-ink/70 text-lg">
+              Análisis real con IA: detecta tu tono de piel, proporciones y colores ideales
             </p>
           </motion.div>
 
@@ -222,26 +272,44 @@ export const ScanStudio: React.FC = () => {
               >
                 <Card variant="glass" className="p-12 text-center space-y-6">
                   <motion.div
-                    className="inline-block p-8 bg-sage/10 rounded-full"
+                    className="inline-block p-8 bg-ink/5 rounded-3xl"
                     whileHover={{ scale: 1.1 }}
                   >
-                    <Camera className="text-sage" size={48} />
+                    <Camera className="text-ink" size={48} />
                   </motion.div>
 
                   <div>
-                    <h2 className="text-2xl font-bold text-sage mb-2">Ready to scan?</h2>
-                    <p className="text-gray-600">
-                      We'll use your device's camera to analyze your measurements and coloring
+                    <h2 className="text-2xl font-bold text-ink mb-2">¿Listo para escanear?</h2>
+                    <p className="text-ink/70 mb-3">
+                      La IA analizará tu foto para detectar tono de piel, proporciones y paleta de colores
                     </p>
+                    <div className="flex items-center justify-center gap-2 text-sm text-ember font-semibold">
+                      <Sparkles size={16} />
+                      Análisis inteligente en tiempo real
+                    </div>
                   </div>
 
-                  <Button variant="neon" size="lg" onClick={handleCameraRequest}>
-                    <Camera size={20} />
-                    Activate Camera
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Button variant="primary" size="lg" onClick={handleCameraRequest}>
+                      <Camera size={20} />
+                      Activar cámara
+                    </Button>
+                    <Button variant="secondary" size="lg" onClick={handleFileUpload}>
+                      <Upload size={20} />
+                      Subir foto
+                    </Button>
+                  </div>
 
-                  <p className="text-sm text-gray-500 border-t border-sage/10 pt-6">
-                    Your privacy is protected. Images are processed locally and never stored.
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+
+                  <p className="text-sm text-ink/60 border-t border-ink/10 pt-6">
+                    Tu privacidad está protegida. El video se procesa localmente y no se guarda.
                   </p>
                 </Card>
               </motion.div>
@@ -265,37 +333,40 @@ export const ScanStudio: React.FC = () => {
                       videoConstraints={{ facingMode: 'user' }}
                     />
 
-                    {/* NEW PREMIUM OVERLAY */}
-                    <ScanningOverlay />
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 640 480">
+                      <g className="opacity-50 stroke-sun stroke-2 fill-none">
+                        <circle cx="320" cy="240" r="120" />
+                        <line x1="200" y1="240" x2="100" y2="240" />
+                        <line x1="440" y1="240" x2="540" y2="240" />
+                        <line x1="320" y1="120" x2="320" y2="20" />
+                        <line x1="320" y1="360" x2="320" y2="460" />
+
+                        <circle cx="280" cy="200" r="8" fill="currentColor" />
+                        <circle cx="360" cy="200" r="8" fill="currentColor" />
+                        <circle cx="320" cy="280" r="8" fill="currentColor" />
+                      </g>
+                    </svg>
 
                     <motion.div
-                      className="absolute inset-0 border-2 border-neon-blue rounded-3xl pointer-events-none"
-                      animate={{ opacity: [0.1, 0.4, 0.1] }}
+                      className="absolute inset-0 border-2 border-sun rounded-3xl"
+                      animate={{ opacity: [0.3, 0.8, 0.3] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
                   </div>
                 </Card>
 
                 <div className="flex gap-4 justify-center">
-                  <Button 
-                    variant="secondary" 
-                    onClick={handleNewScan}
-                    className="backdrop-blur-md bg-white/10"
-                  >
-                    Cancel
+                  <Button variant="secondary" onClick={handleNewScan}>
+                    Cancelar
                   </Button>
-                  <Button 
-                    variant="neon" 
-                    onClick={handleCapture}
-                    className="shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:shadow-[0_0_30px_rgba(0,240,255,0.6)] animate-pulse"
-                  >
-                    <motion.span
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      Capturar y Analizar
-                    </motion.span>
+                  <Button variant="primary" onClick={handleCapture}>
+                    <Sparkles size={18} />
+                    Capturar y analizar con IA
                   </Button>
+                </div>
+
+                <div className="text-center text-sm text-ink/60">
+                  <p>💡 Asegúrate de tener buena iluminación para mejores resultados</p>
                 </div>
               </motion.div>
             )}
@@ -324,30 +395,25 @@ export const ScanStudio: React.FC = () => {
                     />
                   </div>
 
-                  <div className="space-y-4">
-                    <AnimatePresence mode="wait">
-                      <motion.h2 
-                        key={currentStep}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="text-2xl font-bold text-neon-blue font-mono tracking-tighter"
-                      >
-                        {ANALYSIS_STEPS[currentStep]}
-                      </motion.h2>
-                    </AnimatePresence>
-                    
-                    <p className="text-gray-400 font-mono text-sm tracking-widest uppercase">Procesando Biometría 3D</p>
+                  <div>
+                    <h2 className="text-2xl font-bold text-ink mb-2">Analizando con IA...</h2>
+                    <p className="text-ink/70 mb-4">
+                      {progress < 40 
+                        ? '🎨 Extrayendo colores dominantes...' 
+                        : progress < 75 
+                        ? '🧬 Detectando tono de piel...' 
+                        : '✨ Generando recomendaciones personalizadas...'}
+                    </p>
 
-                    <div className="w-full bg-white/5 rounded-full h-1 overflow-hidden border border-white/10 mt-6">
+                    <div className="w-full bg-ink/10 rounded-full h-2 overflow-hidden">
                       <motion.div
-                        className="h-full bg-gradient-to-r from-neon-blue to-purple-500 shadow-[0_0_10px_#00F0FF]"
+                        className="h-full bg-gradient-to-r from-ember to-sun"
                         initial={{ width: 0 }}
                         animate={{ width: `${progress}%` }}
                         transition={{ duration: 0.5 }}
                       />
                     </div>
-                    <p className="text-xs text-neon-blue/60 font-mono mt-2">{Math.round(progress)}% COMPLETE</p>
+                    <p className="text-sm text-ink/60 mt-2">{Math.round(progress)}%</p>
                   </div>
                 </Card>
               </motion.div>
@@ -361,107 +427,129 @@ export const ScanStudio: React.FC = () => {
                 exit={{ opacity: 0, y: -30 }}
                 className="space-y-6"
               >
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* MAIN BIO CARD */}
-                  <Card variant="solid" className="lg:col-span-2 p-8 space-y-8 bg-white shadow-2xl border-t-4 border-neon-blue">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h2 className="text-3xl font-black text-sage tracking-tight mb-2 uppercase italic">Profile Analysis</h2>
-                        <p className="text-gray-500 font-medium">Escaneo completado exitosamente</p>
-                      </div>
-                      <div className="px-3 py-1 bg-neon-blue/10 rounded-full border border-neon-blue/30">
-                        <span className="text-xs font-bold text-neon-blue tracking-widest uppercase">AI Verified</span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-6 bg-sage/5 rounded-2xl border border-sage/10 group hover:bg-sage/10 transition-colors">
-                        <p className="text-[10px] font-bold text-sage/60 uppercase tracking-widest mb-3">Body Shape</p>
-                        <p className="text-xl font-black text-sage group-hover:scale-105 transition-transform origin-left">{bodyShapeLabels[currentScan.bodyShape]}</p>
-                      </div>
-                      <div className="p-6 bg-sage/5 rounded-2xl border border-sage/10 group hover:bg-sage/10 transition-colors">
-                        <p className="text-[10px] font-bold text-sage/60 uppercase tracking-widest mb-3">Skin Tone</p>
-                        <p className="text-xl font-black text-sage group-hover:scale-105 transition-transform origin-left">{skinToneLabels[currentScan.skinTone]}</p>
-                      </div>
-                      <div className="p-6 bg-sage/5 rounded-2xl border border-sage/10 group hover:bg-sage/10 transition-colors">
-                        <p className="text-[10px] font-bold text-sage/60 uppercase tracking-widest mb-3">Suggested Size</p>
-                        <div className="flex items-center gap-2">
-                          <span className="text-3xl font-black text-neon-blue">{currentScan.suggestedSize}</span>
-                          <span className="text-[10px] text-gray-400 font-mono">ADULT_STD</span>
+                <Card variant="solid" className="p-8 space-y-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-bold text-ink">Tu perfil de estilo</h2>
+                      {currentScan.confidence && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Sparkles size={16} className="text-ember" />
+                          <span className="text-ink/60">
+                            Confianza IA: <span className="font-bold text-ink">{currentScan.confidence}%</span>
+                          </span>
                         </div>
-                      </div>
+                      )}
                     </div>
 
-                    <div className="space-y-6">
-                      <h3 className="text-sm font-black text-sage uppercase tracking-[0.2em] flex items-center gap-2">
-                        <div className="w-4 h-[2px] bg-neon-blue" />
-                        Ideal Color Palette
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="p-4 bg-ink/5 rounded-xl">
+                        <p className="text-sm text-ink/60 mb-1">Tipo de cuerpo</p>
+                        <p className="text-2xl font-bold text-ink">{bodyShapeLabels[currentScan.bodyShape]}</p>
+                      </div>
+                      <div className="p-4 bg-ink/5 rounded-xl">
+                        <p className="text-sm text-ink/60 mb-1">Tono de piel</p>
+                        <p className="text-2xl font-bold text-ink">{skinToneLabels[currentScan.skinTone]}</p>
+                      </div>
+                      <div className="p-4 bg-ink/5 rounded-xl">
+                        <p className="text-sm text-ink/60 mb-1">Talla sugerida</p>
+                        <p className="text-2xl font-bold text-ink">{currentScan.suggestedSize}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Colores dominantes detectados */}
+                  {currentScan.dominantColors && currentScan.dominantColors.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <h3 className="text-lg font-semibold text-ink mb-3 flex items-center gap-2">
+                        <Sparkles size={18} className="text-ember" />
+                        Colores detectados en tu foto
                       </h3>
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        {currentScan.colorPalette.map((color: any, i: number) => (
+                      <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
+                        {currentScan.dominantColors.slice(0, 8).map((color: any, i: number) => (
                           <motion.div
                             key={i}
-                            whileHover={{ y: -5 }}
-                            className="group"
+                            whileHover={{ scale: 1.1 }}
+                            className="text-center"
                           >
                             <div
-                              className="w-full aspect-square rounded-2xl shadow-xl mb-3 border-4 border-white transition-all group-hover:shadow-neon-blue/20"
+                              className="w-full aspect-square rounded-lg shadow-md border-2 border-ink/10"
                               style={{ backgroundColor: color.hex }}
+                              title={color.name}
                             />
-                            <p className="text-[10px] font-black text-sage uppercase tracking-tighter truncate">{color.name}</p>
-                            <p className="text-[9px] text-gray-400 font-mono tracking-widest uppercase">{color.hex}</p>
+                            <p className="text-xs text-ink/60 mt-1">{color.name}</p>
                           </motion.div>
                         ))}
                       </div>
+                    </motion.div>
+                  )}
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <h3 className="text-lg font-semibold text-ink mb-4">Tu paleta de color ideal</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      {currentScan.colorPalette.map((color: any, i: number) => (
+                        <motion.div
+                          key={i}
+                          whileHover={{ scale: 1.05 }}
+                          className="text-center"
+                        >
+                          <div
+                            className="w-full aspect-square rounded-xl shadow-lg mb-2 border-2 border-ink/10 cursor-pointer hover:border-ember transition-colors"
+                            style={{ backgroundColor: color.hex }}
+                          />
+                          <p className="text-xs font-medium text-ink/80">{color.name}</p>
+                          <p className="text-xs text-ink/50">{color.hex}</p>
+                        </motion.div>
+                      ))}
                     </div>
-                  </Card>
+                  </motion.div>
 
-                  {/* SIDEBAR RECS */}
-                  <div className="space-y-6">
-                    <Card variant="glass" className="p-8 border-sage/20 bg-sage text-white h-full">
-                      <h3 className="text-xl font-black mb-6 italic uppercase tracking-tighter">Style AI Insights</h3>
-                      <ul className="space-y-6">
-                        {currentScan.styleRecommendations.map((rec: string, i: number) => (
-                          <motion.li
-                            key={i}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.5 + i * 0.1 }}
-                            className="flex items-start gap-4"
-                          >
-                            <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 text-xs font-black">
-                              {i + 1}
-                            </div>
-                            <p className="text-sm font-medium leading-relaxed text-sand/90 italic tracking-tight">
-                              {rec}
-                            </p>
-                          </motion.li>
-                        ))}
-                      </ul>
-                      
-                      <div className="mt-12 p-4 bg-white/10 rounded-2xl border border-white/10">
-                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-60">Confidence Score</p>
-                        <div className="flex items-end gap-2">
-                          <span className="text-4xl font-black">98</span>
-                          <span className="text-xl font-bold opacity-60 mb-1">%</span>
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
-                </div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <h3 className="text-lg font-semibold text-ink mb-3">Recomendaciones de estilo</h3>
+                    <ul className="space-y-2">
+                      {currentScan.styleRecommendations.map((rec: string, i: number) => (
+                        <motion.li
+                          key={i}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.5 + i * 0.1 }}
+                          className="flex items-start gap-3 text-ink/80"
+                        >
+                          <div className="w-2 h-2 rounded-full bg-ember mt-2 flex-shrink-0" />
+                          {rec}
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                </Card>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-                  <Button variant="secondary" onClick={handleNewScan} className="px-8">
-                    Nuevo Escaneo
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button variant="secondary" onClick={handleNewScan}>
+                    Nuevo escaneo
                   </Button>
                   <Button
-                    variant="neon"
+                    variant="primary"
                     onClick={handleSaveResults}
                     isLoading={biometricLoading}
                     className="px-12 shadow-[0_20px_40px_rgba(0,240,255,0.3)]"
                   >
-                    <Save size={20} className="mr-2" />
-                    Guardar Perfil de Estilo
+                    <Save size={20} />
+                    Guardar en perfil
                   </Button>
                 </div>
               </motion.div>
@@ -469,6 +557,7 @@ export const ScanStudio: React.FC = () => {
           </AnimatePresence>
         </div>
       </div>
+      <Footer />
     </PageTransition>
   );
 };

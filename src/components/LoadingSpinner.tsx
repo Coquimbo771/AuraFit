@@ -14,8 +14,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', var
   };
 
   const colors = {
-    primary: 'border-sage',
-    neon: 'border-neon-blue',
+    primary: 'border-ember',
+    neon: 'border-sun',
   };
 
   return (

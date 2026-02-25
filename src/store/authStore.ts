@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
-import type { User, AuthState } from '../types';
+import type { User, AuthState, UserRole } from '../types';
 
 interface AuthStore extends AuthState {
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, role?: UserRole) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   getCurrentUser: () => Promise<void>;
+  isAdmin: () => boolean;
   clearError: () => void;
 }
 
@@ -16,7 +18,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   loading: true,
   error: null,
 
-  signUp: async (email: string, password: string, fullName: string) => {
+  signUp: async (email: string, password: string, fullName: string, role: UserRole = 'client') => {
     set({ loading: true, error: null });
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -25,6 +27,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         options: {
           data: {
             full_name: fullName,
+            role,
           },
         },
       });
@@ -97,6 +100,32 @@ export const useAuthStore = create<AuthStore>((set) => ({
     }
   },
 
+  signInWithGoogle: async () => {
+    set({ loading: true, error: null });
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+
+      if (error) throw error;
+      // OAuth redirect will handle the rest
+      set({ loading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Google sign in failed',
+        loading: false,
+      });
+      throw error;
+    }
+  },
+
   signOut: async () => {
     set({ loading: true });
     try {
@@ -137,6 +166,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
       console.error('Error getting current user:', error);
       set({ loading: false });
     }
+  },
+
+  isAdmin: () => {
+    const user = useAuthStore.getState().user;
+    return user?.role === 'admin';
   },
 
   clearError: () => set({ error: null }),

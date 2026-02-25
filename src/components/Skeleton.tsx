@@ -6,7 +6,7 @@ interface SkeletonProps {
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({ type = 'text', className = '' }) => {
-  const baseClass = 'bg-gradient-to-r from-sage/10 to-sage/20 animate-shimmer bg-[length:200%_100%]';
+  const baseClass = 'bg-gradient-to-r from-ink/5 to-ink/10 animate-shimmer bg-[length:200%_100%]';
 
   const typeClasses = {
     card: `${baseClass} rounded-2xl h-64 w-full`,
