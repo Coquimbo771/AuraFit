@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Sliders, Search, ArrowUpDown } from 'lucide-react';
-import { ProductCard, PageTransition, Skeleton, Button, Badge, PredictiveInput, PersonalizedRecommendations, Footer } from '../components';
+import { ProductCard, PageTransition, Skeleton, Button, Badge, PredictiveInput, Footer, Card  } from '../components';
 import { useShoppingStore } from '../store/shoppingStore';
 import { useAuthStore } from '../store/authStore';
 import { useBehaviorStore } from '../store/behaviorStore';
+import { useBiometricStore } from '../store/biometricStore';
 import { supabase } from '../lib/supabase';
 import { semanticSearch } from '../lib/recommendations';
 import { useDebounce } from '../hooks/useDebounce';
@@ -13,6 +14,7 @@ import type { Product, ProductCategory } from '../types';
 export const Marketplace: React.FC = () => {
   const { user } = useAuthStore();
   const { trackSearch } = useBehaviorStore();
+  const { currentScan } = useBiometricStore();
   const {
     filters,
     savedItems,
@@ -35,6 +37,26 @@ export const Marketplace: React.FC = () => {
   const debouncedQuery = useDebounce(query, 400);
 
   const occasions: ProductCategory[] = ['office', 'gym', 'party', 'casual'];
+
+  // Logic to calculate a "Real-ish" Match Score based on biometrics
+  const calculateMatchScore = (product: Product, scan: any): number => {
+    if (!scan) return 75 + Math.floor(Math.random() * 15); // Base score if no scan
+    
+    let baseScore = 85;
+    
+    // Match by occasion vs body shape (Simulated logic)
+    if (scan.body_shape === 'hourglass' && product.category === 'party') baseScore += 12;
+    if (scan.body_shape === 'athletic' && product.category === 'gym') baseScore += 10;
+    if (scan.body_shape === 'inverted_triangle' && product.category === 'casual') baseScore += 8;
+    
+    // Sustainability bonus
+    if (product.sustainable_rating >= 4) baseScore += 5;
+    
+    // Add some random variety so it's not static
+    const variability = (product.id.charCodeAt(0) % 5);
+    
+    return Math.min(99, baseScore + variability);
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -235,9 +257,8 @@ export const Marketplace: React.FC = () => {
                     <h4 className="font-semibold text-ink dark:text-sand-50 mb-2 sm:mb-3 text-sm sm:text-base">Sostenibilidad</h4>
                     <div className="flex gap-1 sm:gap-1.5">
                       {[1, 2, 3, 4, 5].map((rating) => (
-                        <motion.button
+                        <button
                           key={rating}
-                          whileHover={{ scale: 1.1 }}
                           onClick={() => setSustainabilityFilter(rating)}
                           className={
                             filters.sustainabilityMin === rating
@@ -245,8 +266,8 @@ export const Marketplace: React.FC = () => {
                               : 'flex-1 py-1.5 sm:py-2 rounded text-sm sm:text-base transition-colors bg-ink/5 dark:bg-dark-700 text-ink/70 dark:text-sand-50/70 hover:bg-ink/10 dark:hover:bg-dark-600'
                           }
                         >
-                          ★
-                        </motion.button>
+                          {rating}
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -258,6 +279,7 @@ export const Marketplace: React.FC = () => {
                         type="range"
                         min="0"
                         max="1000"
+                        step="50"
                         value={filters.priceRange[1]}
                         onChange={(e) => setPriceRange(0, parseInt(e.target.value))}
                         className="w-full accent-ember dark:accent-neon-blue"
@@ -271,6 +293,7 @@ export const Marketplace: React.FC = () => {
               </div>
             </motion.div>
 
+            {/* PRODUCT GRID */}
             <div className="lg:col-span-3">
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                 {['oficina elegante', 'party look', 'sostenible', 'tallas inclusivas'].map((smartTag) => (
@@ -313,27 +336,29 @@ export const Marketplace: React.FC = () => {
               )}
 
               {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
                   {[...Array(6)].map((_, i) => (
-                    <Skeleton key={i} type="card" />
+                    <Skeleton key={i} type="card" className="aspect-[3/5] rounded-3xl" />
                   ))}
                 </div>
               ) : filteredProducts.length === 0 ? (
-                <div className="text-center py-8 sm:py-12">
-                  <p className="text-ink/70 dark:text-sand-50/70 text-base sm:text-lg mb-3 sm:mb-4">No hay productos con esos filtros</p>
-                  <Button
-                    variant="secondary"
-                    size="md"
-                    onClick={() => {
-                      setOccasionFilter([]);
-                      setSustainabilityFilter(1);
-                      setPriceRange(0, 1000);
-                      setQuery('');
-                    }}
-                  >
-                    Reiniciar filtros
-                  </Button>
-                </div>
+                <Card variant="glass" className="py-24 text-center border-dashed border-2 border-gray-200 bg-gray-50/50">
+                  <div className="max-w-xs mx-auto">
+                    <Sliders className="mx-auto text-gray-300 mb-6" size={48} />
+                    <h3 className="text-xl font-black text-sage uppercase italic tracking-tighter mb-4">No Matches Found</h3>
+                    <p className="text-sm text-gray-500 mb-8 font-medium">Try adjusting your filters or expanding your price range.</p>
+                    <Button
+                      variant="neon"
+                      onClick={() => {
+                        setOccasionFilter([]);
+                        setSustainabilityFilter(1);
+                        setPriceRange(0, 1000);
+                      }}
+                    >
+                      Reset All Filters
+                    </Button>
+                  </div>
+                </Card>
               ) : (
                 <motion.div
                   initial="hidden"
@@ -343,29 +368,27 @@ export const Marketplace: React.FC = () => {
                     visible: {
                       opacity: 1,
                       transition: {
-                        staggerChildren: 0.05,
+                        staggerChildren: 0.1,
                       },
                     },
                   }}
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6"
                 >
-                  {filteredProducts.map((product, i) => (
+                  {filteredProducts.map((product) => (
                     <motion.div
                       key={product.id}
-                      variants={{
-                        hidden: { opacity: 0, y: 20 },
-                        visible: { opacity: 1, y: 0 },
-                      }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
                       className="flex flex-col h-full"
                     >
                       <ProductCard
                         product={product}
-                        matchScore={60 + Math.floor(Math.random() * 40)}
+                        matchScore={calculateMatchScore(product, currentScan)}
                         isSaved={savedItems.includes(product.id)}
                         onAddToWardrobe={() => handleAddToWardrobe(product.id)}
                         onRemoveFromWardrobe={() => handleRemoveFromWardrobe(product.id)}
                         onQuickView={() => {
-                          alert(`${product.name}\n\n${product.description}\n\nPrice: $${product.price}`);
+                          // Modal logic could go here
                         }}
                       />
                       <Button

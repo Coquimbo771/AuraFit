@@ -9,10 +9,99 @@ import { analyzeImage, validateImageQuality } from '../lib/imageAnalysis';
 
 type ScanPhase = 'idle' | 'camera' | 'processing' | 'results';
 
+const ScanningOverlay: React.FC = () => {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Horizontal Scanning Line */}
+      <motion.div
+        className="absolute w-full h-1 bg-neon-blue/40 shadow-[0_0_15px_rgba(0,240,255,0.8)] z-10"
+        animate={{ top: ['0%', '100%', '0%'] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+      />
+
+      {/* Grid Mesh Background */}
+      <div 
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `linear-gradient(to right, #00F0FF 1px, transparent 1px), linear-gradient(to bottom, #00F0FF 1px, transparent 1px)`,
+          backgroundSize: '40px 40px',
+        }}
+      />
+
+      {/* Target Corners */}
+      <div className="absolute inset-10 border-2 border-neon-blue/20 rounded-3xl">
+        {[0, 90, 180, 270].map((rotation) => (
+          <div
+            key={rotation}
+            className="absolute w-8 h-8 border-t-4 border-l-4 border-neon-blue"
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              top: rotation === 0 || rotation === 270 ? -2 : 'auto',
+              bottom: rotation === 90 || rotation === 180 ? -2 : 'auto',
+              left: rotation === 0 || rotation === 90 ? -2 : 'auto',
+              right: rotation === 180 || rotation === 270 ? -2 : 'auto',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Measurement Points (Simulated Detection) */}
+      {[
+        { top: '25%', left: '50%', label: 'CHEST' },
+        { top: '45%', left: '50%', label: 'WAIST' },
+        { top: '65%', left: '50%', label: 'HIPS' },
+        { top: '15%', left: '35%', label: 'L-SHOULDER' },
+        { top: '15%', left: '65%', label: 'R-SHOULDER' },
+      ].map((point, i) => (
+        <motion.div
+          key={i}
+          className="absolute"
+          style={{ top: point.top, left: point.left }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 1, 0.5] }}
+          transition={{ delay: i * 0.5, duration: 2, repeat: Infinity }}
+        >
+          <div className="w-3 h-3 bg-neon-blue rounded-full shadow-[0_0_10px_#00F0FF] -translate-x-1/2 -translate-y-1/2" />
+          <motion.div 
+            className="absolute top-4 left-4 whitespace-nowrap text-[10px] font-mono text-neon-blue font-bold tracking-widest bg-black/40 px-1 rounded"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            {point.label} :: DETECTED
+          </motion.div>
+        </motion.div>
+      ))}
+
+      {/* Digital Telemetry (Corners) */}
+      <div className="absolute top-6 left-6 font-mono text-[10px] text-neon-blue/60 leading-tight">
+        SCAN_MODE: BIOMETRIC_3D<br />
+        SYNC: ACTIVE<br />
+        RES: 8K_DYNAMIC
+      </div>
+      <div className="absolute bottom-6 right-6 font-mono text-[10px] text-neon-blue/60 text-right">
+        LAT: 12.456<br />
+        LNG: 89.123<br />
+        FRAME: {Math.floor(Math.random() * 1000)}
+      </div>
+    </div>
+  );
+};
+
+const ANALYSIS_STEPS = [
+  "Iniciando escaneo biométrico...",
+  "Mapeando estructura corporal...",
+  "Analizando subtonos de piel...",
+  "Detectando puntos de articulación...",
+  "Calculando proporciones ideales...",
+  "Consultando motor de estilo IA...",
+  "Finalizando perfil de usuario..."
+];
+
 export const ScanStudio: React.FC = () => {
   const [phase, setPhase] = useState<ScanPhase>('idle');
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
   const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
   const webcamRef = useRef<Webcam>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { saveBiometric, loading: biometricLoading } = useBiometricStore();
@@ -229,18 +318,19 @@ export const ScanStudio: React.FC = () => {
             {phase === 'camera' && (
               <motion.div
                 key="camera"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 className="space-y-6"
               >
-                <Card variant="solid" className="overflow-hidden">
-                  <div className="relative aspect-video bg-black">
+                <Card variant="solid" className="overflow-hidden border-2 border-neon-blue/30 shadow-[0_0_30px_rgba(0,240,255,0.2)] bg-black">
+                  <div className="relative aspect-video">
                     <Webcam
                       ref={webcamRef}
-                      className="w-full h-full"
+                      className="w-full h-full object-cover"
                       mirrored
                       screenshotFormat="image/jpeg"
+                      videoConstraints={{ facingMode: 'user' }}
                     />
 
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 640 480">
@@ -284,19 +374,26 @@ export const ScanStudio: React.FC = () => {
             {phase === 'processing' && (
               <motion.div
                 key="processing"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
                 className="space-y-8"
               >
-                <Card variant="glass" className="p-12 text-center space-y-8">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                    className="flex justify-center"
-                  >
-                    <LoadingSpinner size="lg" variant="neon" />
-                  </motion.div>
+                <Card variant="glass" className="p-12 text-center space-y-8 border-neon-blue/20 bg-black/40 backdrop-blur-2xl">
+                  <div className="relative flex justify-center py-10">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                      className="absolute"
+                    >
+                      <LoadingSpinner size="lg" variant="neon" />
+                    </motion.div>
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="w-24 h-24 bg-neon-blue rounded-full blur-3xl"
+                    />
+                  </div>
 
                   <div>
                     <h2 className="text-2xl font-bold text-ink mb-2">Analizando con IA...</h2>
@@ -325,9 +422,9 @@ export const ScanStudio: React.FC = () => {
             {phase === 'results' && currentScan && (
               <motion.div
                 key="results"
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                exit={{ opacity: 0, y: -30 }}
                 className="space-y-6"
               >
                 <Card variant="solid" className="p-8 space-y-6">
@@ -449,6 +546,7 @@ export const ScanStudio: React.FC = () => {
                     variant="primary"
                     onClick={handleSaveResults}
                     isLoading={biometricLoading}
+                    className="px-12 shadow-[0_20px_40px_rgba(0,240,255,0.3)]"
                   >
                     <Save size={20} />
                     Guardar en perfil

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { Card } from './Card';
+import { Button } from './Button';
 import { Badge } from './Badge';
 import type { Product } from '../types';
 
@@ -70,7 +71,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
       whileHover={{ y: -8 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
       onClick={onQuickView}
-      className="cursor-pointer"
+      className="cursor-pointer group h-full"
     >
       <Card variant="solid" hover={false} className="overflow-hidden h-full flex flex-col">
         <div className="relative overflow-hidden bg-gradient-to-br from-sun/20 via-sand/20 to-ember/10 h-48 sm:h-56 md:h-64">
@@ -99,6 +100,12 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
           >
             <Heart size={16} className="sm:w-[18px] sm:h-[18px] md:w-[20px] md:h-[20px]" fill={showSaved ? 'currentColor' : 'none'} />
           </motion.button>
+
+          <div className="absolute bottom-4 left-4 right-4 translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+             <Button variant="neon" size="sm" className="w-full text-[10px] font-black tracking-[0.2em] uppercase italic bg-white text-sage border-none hover:bg-neon-blue hover:text-white">
+                Quick Look
+             </Button>
+          </div>
         </div>
 
         <div className="p-3 sm:p-4 md:p-5 flex-1 flex flex-col justify-between">

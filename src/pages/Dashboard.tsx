@@ -32,7 +32,7 @@ export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut, loading: authLoading } = useAuthStore();
   const { currentScan, scanHistory, fetchScanHistory, loading: biometricLoading } = useBiometricStore();
-  const { savedItems, orders, fetchOrders } = useShoppingStore();
+  const { savedItems, orders, fetchOrders, fetchSavedItems } = useShoppingStore();
   const [savedProducts, setSavedProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
 
@@ -43,7 +43,8 @@ export const Dashboard: React.FC = () => {
     }
     fetchScanHistory(user.id);
     fetchOrders(user.id);
-  }, [user, fetchScanHistory, fetchOrders, navigate]);
+    fetchSavedItems(user.id);
+  }, [user, fetchScanHistory, fetchOrders, fetchSavedItems, navigate]);
 
   useEffect(() => {
     const fetchSavedProducts = async () => {
@@ -130,12 +131,12 @@ export const Dashboard: React.FC = () => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-min"
+            className="grid grid-cols-1 md:grid-cols-12 gap-6"
           >
-            {/* Profile Card - 2x1 */}
-            <motion.div variants={itemVariants} className="md:col-span-2">
+            {/* 1. Profile Card - 12cols -> 4cols (1/3) */}
+            <motion.div variants={itemVariants} className="md:col-span-4 h-full">
               {loading ? (
-                <Skeleton type="card" className="h-48" />
+                <Skeleton type="card" className="h-64" />
               ) : (
                 <Card variant="solid" className="p-8 h-full flex flex-col justify-between">
                   <div>
@@ -144,7 +145,7 @@ export const Dashboard: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-ink/60">
-                      Miembro desde {new Date(user?.created_at || '').toLocaleDateString()}
+                      Miembro desde {user?.created_at ? new Date(user.created_at).toLocaleDateString() : '---'}
                     </p>
                     <Button variant="ghost" size="sm">
                       <Edit size={16} />
@@ -155,10 +156,10 @@ export const Dashboard: React.FC = () => {
               )}
             </motion.div>
 
-            {/* Latest Scan - 2x1 */}
-            <motion.div variants={itemVariants} className="md:col-span-2">
+            {/* 2. Latest Scan - 12cols -> 5cols */}
+            <motion.div variants={itemVariants} className="md:col-span-5 h-full">
               {loading ? (
-                <Skeleton type="card" className="h-48" />
+                <Skeleton type="card" className="h-64" />
               ) : currentScan ? (
                 <Card variant="solid" className="p-8 h-full">
                   <div className="flex items-center justify-between mb-4">
@@ -199,8 +200,8 @@ export const Dashboard: React.FC = () => {
               )}
             </motion.div>
 
-            {/* Color Palette - 1x1 */}
-            <motion.div variants={itemVariants}>
+            {/* 3. Color Palette - 12cols -> 3cols */}
+            <motion.div variants={itemVariants} className="md:col-span-3 h-full">
               {loading ? (
                 <Skeleton type="card" className="h-48" />
               ) : currentScan?.color_palette ? (
@@ -225,10 +226,10 @@ export const Dashboard: React.FC = () => {
               )}
             </motion.div>
 
-            {/* Scan History - 2x2 */}
-            <motion.div variants={itemVariants} className="md:col-span-2 md:row-span-2">
+            {/* 4. Scan History - 12cols -> 4cols / 2rows */}
+            <motion.div variants={itemVariants} className="md:col-span-4 md:row-span-2">
               {loading ? (
-                <Skeleton type="card" className="h-96" />
+                <Skeleton type="card" className="h-[500px]" />
               ) : (
                 <Card variant="solid" className="p-8 h-full flex flex-col">
                   <h3 className="text-lg font-bold text-ink mb-6">Historial de escaneos</h3>
@@ -248,6 +249,7 @@ export const Dashboard: React.FC = () => {
                           <p className="text-xs text-ink/60">
                             {new Date(scan.scan_date).toLocaleDateString()}
                           </p>
+                          <p className="text-[10px] text-sage/60 font-medium">Verified by StyleEngine™</p>
                         </div>
                         <Camera size={16} className="text-ink/40" />
                       </motion.div>
@@ -260,10 +262,10 @@ export const Dashboard: React.FC = () => {
               )}
             </motion.div>
 
-            {/* Saved Items - 2x1 */}
-            <motion.div variants={itemVariants} className="md:col-span-2">
+            {/* 5. Saved Items - 12cols -> 5cols */}
+            <motion.div variants={itemVariants} className="md:col-span-5 h-full">
               {loading ? (
-                <Skeleton type="card" className="h-48" />
+                <Skeleton type="card" className="h-60" />
               ) : (
                 <Card variant="solid" className="p-6 h-full">
                   <div className="flex items-center justify-between mb-4">
@@ -271,9 +273,9 @@ export const Dashboard: React.FC = () => {
                     <Heart className="text-rose-500" size={20} fill="currentColor" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    {savedProducts.slice(0, 4).map((product, i) => (
+                    {savedProducts.slice(0, 4).map((product) => (
                       <motion.div
-                        key={i}
+                        key={product.id}
                         whileHover={{ scale: 1.05 }}
                         className="aspect-square rounded-2xl bg-ink/5 flex items-center justify-center text-center p-2 cursor-pointer"
                       >
@@ -296,10 +298,10 @@ export const Dashboard: React.FC = () => {
               )}
             </motion.div>
 
-            {/* Match Statistics - 1x1 */}
-            <motion.div variants={itemVariants}>
+            {/* 6. Match Stats - 12cols -> 3cols */}
+            <motion.div variants={itemVariants} className="md:col-span-3 h-full">
               {loading ? (
-                <Skeleton type="card" className="h-48" />
+                <Skeleton type="card" className="h-60" />
               ) : (
                 <Card variant="solid" className="p-6 h-full flex flex-col justify-center items-center text-center">
                   <TrendingUp className="text-ember mb-2" size={28} />
@@ -309,10 +311,10 @@ export const Dashboard: React.FC = () => {
               )}
             </motion.div>
 
-            {/* Sustainability Impact - 1x1 */}
-            <motion.div variants={itemVariants}>
+            {/* 7. Sustainability - 12cols -> 3cols */}
+            <motion.div variants={itemVariants} className="md:col-span-3 h-full">
               {loading ? (
-                <Skeleton type="card" className="h-48" />
+                <Skeleton type="card" className="h-56" />
               ) : (
                 <Card variant="solid" className="p-6 h-full flex flex-col justify-center items-center text-center">
                   <Leaf className="text-sage mb-2" size={28} />

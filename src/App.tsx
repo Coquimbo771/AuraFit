@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useEffect, Suspense, lazy } from 'react';
+=======
+import { useEffect } from 'react';
+>>>>>>> DENIS-AVANCES
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import { Navigation } from './components/Navigation';
