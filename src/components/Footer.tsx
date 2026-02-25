@@ -1,14 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  Instagram, 
-  Facebook, 
-  Twitter, 
-  Linkedin, 
-  Mail, 
-  Phone, 
-  MapPin, 
+import {
+  Instagram,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Mail,
+  Phone,
+  MapPin,
   Heart,
   Sparkles
 } from 'lucide-react';
@@ -24,7 +24,7 @@ export const Footer: React.FC = () => {
       { label: 'Prensa', href: '/press' },
     ],
     servicios: [
-      { label: 'Scan Studio', href: '/scan' },
+      { label: 'Escaneo Inteligente', href: '/scan' },
       { label: 'Marketplace', href: '/marketplace' },
       { label: 'Guía de estilo', href: '/style-guide' },
       { label: 'Asistente virtual', href: '/assistant' },
@@ -97,15 +97,15 @@ export const Footer: React.FC = () => {
               </div>
               <span className="text-2xl font-bold text-sand-50">AuraFit</span>
             </Link>
-            
+
             <p className="text-sand-50/70 text-sm mb-6 leading-relaxed">
               Moda inteligente y sostenible. Encuentra piezas que se ajusten perfectamente a tu estilo, cuerpo y valores.
             </p>
 
             {/* Contact Information */}
             <div className="space-y-3">
-              <a 
-                href="mailto:contacto@aurafit.com" 
+              <a
+                href="mailto:contacto@aurafit.com"
                 className="flex items-center gap-3 text-sand-50/70 hover:text-ember dark:hover:text-neon-blue transition-colors group"
               >
                 <div className="w-8 h-8 rounded-lg bg-ink/50 dark:bg-dark-800 flex items-center justify-center group-hover:bg-ember/20 dark:group-hover:bg-neon-blue/20 transition-colors">
@@ -113,9 +113,9 @@ export const Footer: React.FC = () => {
                 </div>
                 <span className="text-sm">contacto@aurafit.com</span>
               </a>
-              
-              <a 
-                href="tel:+34900123456" 
+
+              <a
+                href="tel:+34900123456"
                 className="flex items-center gap-3 text-sand-50/70 hover:text-ember dark:hover:text-neon-blue transition-colors group"
               >
                 <div className="w-8 h-8 rounded-lg bg-ink/50 dark:bg-dark-800 flex items-center justify-center group-hover:bg-ember/20 dark:group-hover:bg-neon-blue/20 transition-colors">
@@ -123,7 +123,7 @@ export const Footer: React.FC = () => {
                 </div>
                 <span className="text-sm">+34 900 123 456</span>
               </a>
-              
+
               <div className="flex items-start gap-3 text-sand-50/70">
                 <div className="w-8 h-8 rounded-lg bg-ink/50 dark:bg-dark-800 flex items-center justify-center mt-0.5">
                   <MapPin size={16} />

@@ -2,7 +2,7 @@
 
 ## ✨ Ahora el escaneo SÍ funciona con análisis REAL
 
-El **Scan Studio** ahora utiliza **inteligencia artificial real** para analizar tu foto y generar un perfil personalizado. Ya no usa datos aleatorios - cada resultado es único basado en TU imagen.
+El **Escaneo Inteligente** ahora utiliza **inteligencia artificial real** para analizar tu foto y generar un perfil personalizado. Ya no usa datos aleatorios - cada resultado es único basado en TU imagen.
 
 ---
 

@@ -30,7 +30,7 @@ export const Marketplace: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState<'match' | 'price-asc' | 'price-desc' | 'sustainable'>('match');
-  
+
   // Debounce search query for better performance
   const debouncedQuery = useDebounce(query, 400);
 
@@ -166,7 +166,7 @@ export const Marketplace: React.FC = () => {
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 sm:gap-6">
               <div>
                 <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-ink/50 dark:text-sand-50/50">Marketplace</p>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-ink dark:text-sand-50 mb-2 sm:mb-3">Encuentra tu match perfecto</h1>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-ink dark:text-sand-50 mb-2 sm:mb-3">Encuentra tu outfit perfecto</h1>
                 <p className="text-ink/70 dark:text-sand-50/70 text-sm sm:text-base lg:text-lg leading-relaxed">
                   Piezas curadas por fit, colorimetria y sostenibilidad. Compra con menos devoluciones.
                 </p>

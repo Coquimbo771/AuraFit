@@ -63,18 +63,18 @@ export const ScanStudio: React.FC = () => {
         setPhase('idle');
         return;
       }
-      
+
       setProgress(30);
-      
+
       // Analyze image with AI
       const analysisResult = await analyzeImage(imageSrc);
-      
+
       setProgress(70);
-      
+
       // Simulate processing time for better UX
       await new Promise((resolve) => setTimeout(resolve, 800));
       setProgress(100);
-      
+
       // Convert analysis result to scan format
       const scan = {
         id: `scan-${Date.now()}`,
@@ -87,7 +87,7 @@ export const ScanStudio: React.FC = () => {
         dominantColors: analysisResult.dominantColors,
         skinToneRGB: analysisResult.skinToneRGB,
       };
-      
+
       setCurrentScan(scan);
       setPhase('results');
     } catch (error) {
@@ -99,14 +99,14 @@ export const ScanStudio: React.FC = () => {
 
   const handleCapture = async () => {
     if (!webcamRef.current) return;
-    
+
     // Capture image from webcam
     const imageSrc = webcamRef.current.getScreenshot();
     if (!imageSrc) {
       alert('Error al capturar imagen. Intenta de nuevo.');
       return;
     }
-    
+
     await processImage(imageSrc);
   };
 
@@ -164,7 +164,7 @@ export const ScanStudio: React.FC = () => {
           >
             <p className="text-xs uppercase tracking-[0.3em] text-ink/50 flex items-center justify-center gap-2">
               <Sparkles size={14} className="text-ember" />
-              Scan Studio con IA
+              Escaneo Inteligente con IA
             </p>
             <h1 className="text-4xl md:text-5xl font-bold text-ink mb-4">Escaneo Inteligente</h1>
             <p className="text-ink/70 text-lg">
@@ -301,11 +301,11 @@ export const ScanStudio: React.FC = () => {
                   <div>
                     <h2 className="text-2xl font-bold text-ink mb-2">Analizando con IA...</h2>
                     <p className="text-ink/70 mb-4">
-                      {progress < 40 
-                        ? '🎨 Extrayendo colores dominantes...' 
-                        : progress < 75 
-                        ? '🧬 Detectando tono de piel...' 
-                        : '✨ Generando recomendaciones personalizadas...'}
+                      {progress < 40
+                        ? '🎨 Extrayendo colores dominantes...'
+                        : progress < 75
+                          ? '🧬 Detectando tono de piel...'
+                          : '✨ Generando recomendaciones personalizadas...'}
                     </p>
 
                     <div className="w-full bg-ink/10 rounded-full h-2 overflow-hidden">

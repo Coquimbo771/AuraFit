@@ -125,14 +125,14 @@ export const StoreAssistant: React.FC = () => {
                 </div>
                 <p>
                   Aún no tienes un perfil biométrico. Haz un escaneo en el{' '}
-                  <strong>Scan Studio</strong> para recibir recomendaciones 100% personalizadas
+                  <strong>Escaneo Inteligente</strong> para recibir recomendaciones 100% personalizadas
                   para tu figura y colorimetría.
                 </p>
                 <Link
                   to="/scan-studio"
                   className="inline-block px-4 py-2 rounded-xl bg-ember text-white text-xs font-semibold hover:bg-ember/90 transition-colors"
                 >
-                  Ir a Scan Studio →
+                  Ir a Escaneo Inteligente →
                 </Link>
               </div>
             )}
@@ -161,8 +161,8 @@ export const StoreAssistant: React.FC = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${message.role === 'user'
-                      ? 'ml-auto bg-ink text-sand-50 shadow-lg'
-                      : 'bg-white border border-ink/10 text-ink/80 shadow-sm'
+                    ? 'ml-auto bg-ink text-sand-50 shadow-lg'
+                    : 'bg-white border border-ink/10 text-ink/80 shadow-sm'
                     }`}
                 >
                   {message.role === 'assistant' && (

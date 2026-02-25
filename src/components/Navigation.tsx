@@ -15,7 +15,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Inicio', icon: <Home size={20} />, href: '/' },
-  { label: 'Scan Studio', icon: <Wand2 size={20} />, href: '/scan', requiresAuth: true },
+  { label: 'Escaneo I.', icon: <Wand2 size={20} />, href: '/scan', requiresAuth: true },
   { label: 'Marketplace', icon: <ShoppingBag size={20} />, href: '/marketplace' },
   { label: 'Guia de estilo', icon: <BookOpen size={20} />, href: '/style-guide' },
   { label: 'Asistente', icon: <Bot size={20} />, href: '/assistant' },
@@ -65,13 +65,13 @@ export const Navigation: React.FC = () => {
         className="relative bg-sand-50/80 dark:bg-dark-900/90 backdrop-blur-2xl border-b border-ink/10 dark:border-neon-blue/20 transition-all duration-300 dark:shadow-[0_4px_24px_rgba(0,240,255,0.1)]"
       >
         <div className="absolute inset-0 grain opacity-40 dark:opacity-20 pointer-events-none" />
-        
+
         {/* Glow effect para dark mode */}
         <div className="absolute inset-0 opacity-0 dark:opacity-100 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-64 h-1 bg-gradient-to-r from-transparent via-neon-blue/30 to-transparent blur-xl" />
           <div className="absolute top-0 right-1/4 w-64 h-1 bg-gradient-to-r from-transparent via-neon-purple/20 to-transparent blur-xl" />
         </div>
-        
+
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4 relative z-10">
           <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-xl sm:rounded-2xl bg-ember text-ink dark:text-sand-50 flex items-center justify-center font-bold text-sm sm:text-base">
@@ -88,11 +88,10 @@ export const Navigation: React.FC = () => {
               <Link
                 key={item.href}
                 to={item.href}
-                className={`px-2.5 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
-                  isActive(item.href)
+                className={`px-2.5 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-semibold transition-all duration-300 whitespace-nowrap ${isActive(item.href)
                     ? 'bg-ink text-sand-50 dark:bg-gradient-to-r dark:from-neon-blue dark:to-neon-purple dark:text-dark-950 dark:shadow-[0_0_20px_rgba(0,240,255,0.5)] scale-105'
                     : 'text-ink/70 hover:text-ink hover:bg-ink/5 dark:text-sand-50/70 dark:hover:text-sand-50 dark:hover:bg-neon-blue/10 dark:hover:shadow-[0_0_15px_rgba(0,240,255,0.2)]'
-                }`}
+                  }`}
               >
                 {item.label}
               </Link>
@@ -125,7 +124,7 @@ export const Navigation: React.FC = () => {
                     <span className="hidden lg:inline">Admin</span>
                   </Link>
                 )}
-                
+
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -217,7 +216,7 @@ export const Navigation: React.FC = () => {
             >
               {theme === 'light' ? <Moon size={18} className="sm:w-[20px] sm:h-[20px]" /> : <Sun size={18} className="sm:w-[20px] sm:h-[20px]" />}
             </button>
-            
+
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-1.5 sm:p-2 rounded-xl border border-ink/10 dark:border-sand-50/10 text-ink dark:text-sand-50 hover:bg-ink/5 dark:hover:bg-sand-50/5 transition-colors"
@@ -240,18 +239,17 @@ export const Navigation: React.FC = () => {
                   <Link
                     key={item.href}
                     to={item.href}
-                    className={`flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base transition-colors ${
-                      isActive(item.href)
+                    className={`flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base transition-colors ${isActive(item.href)
                         ? 'bg-ink text-sand-50 dark:bg-sand-50 dark:text-ink'
                         : 'bg-white dark:bg-ink-800 text-ink/80 dark:text-sand-50/80 border border-ink/10 dark:border-sand-50/10'
-                    }`}
+                      }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {React.cloneElement(item.icon as React.ReactElement, { size: 18, className: 'sm:w-[20px] sm:h-[20px]' })}
                     {item.label}
                   </Link>
                 ))}
-                
+
                 {user ? (
                   // Usuario logueado - Menú móvil
                   <>
