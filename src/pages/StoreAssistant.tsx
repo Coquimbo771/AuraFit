@@ -82,6 +82,7 @@ export const StoreAssistant: React.FC = () => {
                 <Sparkles size={14} className="text-ember" />
                 AuraFit AI
               </p>
+              <h1 className="text-4xl font-bold text-ink">Consulta tu Estilo</h1>
               <p className="text-ink/70 mt-2">
                 Tu experto personal en moda, colorimetría y ajuste. Pregúntame lo que sea sobre tu próximo outfit.
               </p>
